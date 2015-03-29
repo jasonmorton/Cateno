@@ -1,5 +1,3 @@
 module GeneralizedTensorNetworks
-
-# package code goes here
-
-end # module
+include("MonoidalCategories.jl")
+end
