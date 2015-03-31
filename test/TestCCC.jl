@@ -1,5 +1,5 @@
-using GTNTypes, Typeclass
-import GTNTypes.∘, GTNTypes.⊗
+using MonoidalCategories, Typeclass
+import MonoidalCategories.∘, MonoidalCategories.⊗
 
 typealias Mat Matrix{Float64}
 
