@@ -6,7 +6,7 @@ using Compose:Context,context,rectangle,circle,fill #doesn't put in scope
 export dom,cod,id,munit,⊗,∘
 import MonoidalCategories:ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
 export dual,transp,ev,coev,tr,Hom,sigma
-export tdraw,draw,bra,ket,mbox,swap,lines,Box,Wires
+export tdraw,draw,bra,ket,mbox,swap,lines,Boxx,Wires
 
 #Wires is a container simply so that MonoidalCategory functions like id
 #can be dispatched properly and different categories with Integer objects can be
@@ -19,26 +19,27 @@ export tdraw,draw,bra,ket,mbox,swap,lines,Box,Wires
 type Wires  #An object is a collection of n wires
     n::Integer
 end
+==(w::Wires,z::Wires)=w.n==z.n
 
-type Box    #A morphism is a box with input and output wires (with subboxes)
+type Boxx    #A morphism is a box with input and output wires (with subboxes)
     con::Context   #The Compose.jl Context that holds the drawing
     inwires::Wires
     outwires::Wires
-    length::Int    #number of primitive horizontal boxes in the Box
+    length::Int    #number of primitive horizontal boxes in the Boxx
 end
-Box(c,n::Int,m::Int,ell)=Box(c,Wires(n),Wires(m),ell) 
+Boxx(c,n::Int,m::Int,ell)=Boxx(c,Wires(n),Wires(m),ell) 
 
-@instance MonoidalCategory Wires Box begin
-    dom(c::Box)=c.inwires
-    cod(c::Box)=c.outwires
-    id(n::Wires)=Box(lines(n.n),n,n,1)
-    compose(f::Box,g::Box)=hstackCons(f,g)
-    otimes(f::Box,g::Box)=vstackCons(f,g)
+@instance MonoidalCategory Wires Boxx begin
+    dom(c::Boxx)=c.inwires
+    cod(c::Boxx)=c.outwires
+    id(n::Wires)=Boxx(lines(n.n),n,n,1)
+    compose(f::Boxx,g::Boxx)=hstackCons(f,g)
+    otimes(f::Boxx,g::Boxx)=vstackCons(f,g)
     otimes(n::Wires,m::Wires)=Wires(n.n+m.n)
-    munit(::Wires)=Box(Compose.context(),0,0,0) #this should be an object!  why is Typeclass not throwing an error?
+    munit(::Wires)=Boxx(Compose.context(),0,0,0) #this should be an object!  why is Typeclass not throwing an error?
 end
 
-# function writemime(stream,::MIME"text/html",c::Box)
+# function writemime(stream,::MIME"text/html",c::Boxx)
 #     print(stream,c.con)
 # end
 
@@ -56,14 +57,14 @@ function vstackCons(top,bot)
     con=Compose.compose(Compose.context(), #the new parent context
                         (Compose.context(0,0,1,topshare),top.con), 
                         (Compose.context(0,topshare,1,botshare),bot.con))
-    Box(con,inwires,outwires,max(top.length,bot.length))
+    Boxx(con,inwires,outwires,max(top.length,bot.length))
 end
 
 function hstackCons(left,right)
     newlength=left.length+right.length
     leftshare=left.length/newlength
     rightshare=right.length/newlength
-    Box(Compose.compose(Compose.context(), #the new parent context
+    Boxx(Compose.compose(Compose.context(), #the new parent context
                         (Compose.context(0,0,leftshare,1),left.con),
                         (Compose.context(leftshare,0,rightshare,1),right.con)),
         dom(right),cod(left),newlength)
@@ -90,28 +91,28 @@ function hstackcontexts(c1,c2,c3)
 end
 
 #primitive graphical elements
-bra(n,txt)=Box(hstackcontexts(threeptpoly((0,.5),(1,.95),(1,.05),txt),lines(n)),
+bra(n,txt)=Boxx(hstackcontexts(threeptpoly((0,.5),(1,.95),(1,.05),txt),lines(n)),
                n,0,1)
-ket(n,txt)=Box(hstackcontexts(lines(n),threeptpoly((1,.5),(0,.95),(0,.05),txt)),
+ket(n,txt)=Boxx(hstackcontexts(lines(n),threeptpoly((1,.5),(0,.95),(0,.05),txt)),
                0,n,1)
 ket(n)=ket(n,"")
 bra(n)=bra(n,"")
 
 boxwithtext(txt)=Compose.compose(Compose.context(),Compose.rectangle(0,.05,1,.9),Compose.fill(Compose.RGBA{Float64}(0,0,0,0)),Compose.stroke(Compose.color("black")),Compose.text(.5,.55,txt)) #.5 -1textwidth, .5+1textheight is what we want
-mbox(n,m,txt) = Box(hstackcontexts(lines(m),boxwithtext(txt),lines(n)),n,m,1)
-Box(n,m,txt)=mbox(n,m,txt)
+mbox(n,m,txt) = Boxx(hstackcontexts(lines(m),boxwithtext(txt),lines(n)),n,m,1)
+Boxx(n,m,txt)=mbox(n,m,txt)
 mbox(n,m)=mbox(n,m,"")
-Box(n,m)=mbox(n,m)
+Boxx(n,m)=mbox(n,m)
 
 #todo: make an arbitrary permutation picture and local perm picture
 swap_underline=Compose.compose(Compose.context(),Compose.curve((0,.75),(.7,.75),(.3,.25),(1,.25)),Compose.stroke(Compose.color("black")),Compose.linewidth(1))
 swap_overline(col,wid)=Compose.compose(Compose.context(),Compose.curve((0,.25),(.7,.25),(.3,.75),(1,.75)),Compose.stroke(Compose.color(col)),Compose.linewidth(wid))
 swapcon=Compose.compose(swap_underline,Compose.compose(swap_overline("white",2),swap_overline("black",1)))
 
-swap=Box(swapcon,2,2,1)
+swap=Boxx(swapcon,2,2,1)
 
-draw(f::Box,filename)=tdraw(f.con,filename)
-draw(f::Box)=draw(f,"test.svg")
+draw(f::Boxx,filename)=tdraw(f.con,filename)
+draw(f::Boxx)=draw(f,"test.svg")
 function tdraw(cont,filename)
     img = Compose.SVG(filename, 4Compose.inch, 4(sqrt(3)/2)Compose.inch)
     Compose.draw(img,cont)

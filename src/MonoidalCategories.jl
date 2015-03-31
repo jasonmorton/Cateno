@@ -63,7 +63,7 @@ end
 end
 
 # Utility functions
-comperr(f,g)=error("Domain $(f.dom) unequal to codomain $(g.cod)")
+comperr(f,g)=error("Domain $(dom(f)) unequal to codomain $(cod(g))")
 
 
 
