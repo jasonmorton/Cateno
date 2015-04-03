@@ -105,8 +105,11 @@ end
 T=FTS("f:a⊗b→c,g:a→b⊗c")
 
 
+#without quot, works outside module but not in it, with using FiniteTensorSig
 macro minex_str(str)
-    eval(Expr(:(=),:a,str))
+    quot(
+    Expr(:global,
+    Expr(:(=),:a,str)))
 end
 
 #incomplete:
@@ -125,12 +128,21 @@ macro fts_str(str)
         push!(block.args,morphism_name_decl)
     end
 #    println(Expr(:block,block,nothing))
-    # for obvar in T.obvars
-    # end
+    for object_variable_symbol in T.obvars
+        quotedsymbol = quot(object_variable_symbol)
+        object_name_decl=Expr(:(=),
+                              object_variable_symbol, #LHS
+                              Expr(:call,:(FiniteTensorSignatures.ObjectWord),
+                                   Expr(:call, :OWord, quotedsymbol),:T), #RHS
+                              true)
+        push!(block.args,object_name_decl)
+    end
 #    block
 #    Expr(:block,block,nothing)
-    eval(block)
+#    info(T,"'s variables added to global scope")
+    quot(block)
 end
+#eval(fts"f:a→b") now works
 
 #An object expression which remembers its FiniteTensorSignature
 type ObjectWord #{FiniteTensorSignature}
