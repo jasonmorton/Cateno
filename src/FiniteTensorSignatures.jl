@@ -9,8 +9,11 @@ export dual,transp,ev,coev,tr,Hom,sigma
 export dagger
 export OWord #temp
 
+export @minex_str
+
 using Typeclass
 import Base:show,ctranspose,transpose
+import Base.Meta.quot
 
 #Represent words in $\mathcal{T}^{\circ,\ot}$ as raw Julia expressions with no TS or dom/cod checking, for internal use only
 typealias MWord Union(Expr,Symbol)
@@ -101,19 +104,32 @@ end
 
 T=FTS("f:a⊗b→c,g:a→b⊗c")
 
+
+macro minex_str(str)
+    eval(Expr(:(=),:a,str))
+end
+
 #incomplete:
 #instantiates tensor sig and places its variables in global scope.
 macro fts_str(str)
     T=FTS(str)
-    block=[]
-    for morvar in T.morvars
-        ex=Expr(:call,MW,morvar,T)
-        block.append(ex)
+    block=Expr(:block)
+    Tdecl=Expr(:(=), :T, Expr(:call, :FTS, str))
+    push!(block.args,Tdecl)
+    for morphism_variable_symbol in T.morvars
+        quotedsymbol = quot(morphism_variable_symbol)
+        morphism_name_decl=Expr(:(=),
+                       morphism_variable_symbol, #LHS
+                       Expr(:call,:MW,quotedsymbol,:T), #RHS
+                       true)#cargo)
+        push!(block.args,morphism_name_decl)
     end
-    for obvar in T.obvars
-        
-    end
-    block
+#    println(Expr(:block,block,nothing))
+    # for obvar in T.obvars
+    # end
+#    block
+#    Expr(:block,block,nothing)
+    eval(block)
 end
 
 #An object expression which remembers its FiniteTensorSignature
