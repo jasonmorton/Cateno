@@ -159,7 +159,7 @@ function show(io::IO,w::ObjectWord)
     print(io,"$(otreestring(w.contents.word)) over $(w.signature)")
 end
 function ==(A::ObjectWord,B::ObjectWord)
-    A.contents.word==B.contents.word && A.signature == B.signature
+    A.contents==B.contents && A.signature == B.signature
 end
 
 
