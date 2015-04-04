@@ -8,6 +8,8 @@ import MonoidalCategories:ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
 export dual,transp,ev,coev,tr,Hom,sigma
 export tdraw,draw,bra,ket,mbox,swap,lines,Boxx,Wires
 
+import Base.writemime
+
 #Wires is a container simply so that MonoidalCategory functions like id
 #can be dispatched properly and different categories with Integer objects can be
 #distinguished. another approach would be to make this a parametric type like
@@ -28,6 +30,7 @@ type Boxx    #A morphism is a box with input and output wires (with subboxes)
     length::Int    #number of primitive horizontal boxes in the Boxx
 end
 Boxx(c,n::Int,m::Int,ell)=Boxx(c,Wires(n),Wires(m),ell) 
+writemime(io::IO, m::MIME"image/svg+xml", b::Boxx)=writemime(io::IO, m, b.con)
 
 @instance MonoidalCategory Wires Boxx begin
     dom(c::Boxx)=c.inwires
@@ -38,10 +41,6 @@ Boxx(c,n::Int,m::Int,ell)=Boxx(c,Wires(n),Wires(m),ell)
     otimes(n::Wires,m::Wires)=Wires(n.n+m.n)
     munit(::Wires)=Wires(0)  #this should be an object! if used Boxx, why is Typeclass not throwing an error?
 end
-
-# function writemime(stream,::MIME"text/html",c::Boxx)
-#     print(stream,c.con)
-# end
 
 ##### Associative vertical and horizontal stacking #########
 #the strategy to get associative ⊗ vertically is to track the total, maximum number of wires.  In the final image, each wire gets the same amount of space above and below.  For horizontal ∘, we use length.  We may also need virtual wires or spacer wires to pad any vertical slices that fall short.
