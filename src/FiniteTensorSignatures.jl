@@ -21,6 +21,8 @@ typealias MWord Union(Expr,Symbol)
 type OWord
     word::Union(Expr,Symbol)
 end
+==(u::OWord,v::OWord)=flattenotree(u.word)==flattenotree(v.word) #assoc compare
+
 
 #typealias OWord Union(Expr,Symbol)
 @instance MonoidalCategory OWord MWord  begin
