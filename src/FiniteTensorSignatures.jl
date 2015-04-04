@@ -7,7 +7,7 @@ export FiniteTensorSignature,nullsig,FTS,MW,@fts_str
 export dom,cod,id,munit,⊗,∘
 export dual,transp,ev,coev,tr,Hom,sigma
 export dagger
-export OWord #temp
+export OWord,ObjectWord,MorphismWord #temp
 
 export @minex_str
 
