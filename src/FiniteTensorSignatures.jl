@@ -117,6 +117,7 @@ end
 macro fts_str(str)
     T=FTS(str)
     block=Expr(:block)
+    # to do: us a let in this line to not name it?
     Tdecl=Expr(:(=), :T, Expr(:call, :FTS, str))
     push!(block.args,Tdecl)
     for morphism_variable_symbol in T.morvars
@@ -137,6 +138,7 @@ macro fts_str(str)
                               true)
         push!(block.args,object_name_decl)
     end
+    push!(block.args,:T) #return the tensor scheme, change after let
 #    block
 #    Expr(:block,block,nothing)
 #    info(T,"'s variables added to global scope")

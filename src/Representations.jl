@@ -57,7 +57,7 @@ type Representation#{ObjectType,MorphismType}
             #check that F(f) is defined
             @assert haskey(md,f)
             #check that dom(F(f))==F(dom(f))
-            @assert F(T.dom[f])==dom(F(f))  (F(T.dom[f]),dom(F(f)))
+            @assert F(T.dom[f])==dom(F(f))  ("dom(F(f)):",F(T.dom[f])," unequal to F(dom(f)): ",dom(F(f)))
             #check that cod(F(f))==F(cod(f)) 
             @assert F(T.cod[f])==cod(F(f))
         end

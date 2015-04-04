@@ -36,7 +36,7 @@ Boxx(c,n::Int,m::Int,ell)=Boxx(c,Wires(n),Wires(m),ell)
     compose(f::Boxx,g::Boxx)=hstackCons(f,g)
     otimes(f::Boxx,g::Boxx)=vstackCons(f,g)
     otimes(n::Wires,m::Wires)=Wires(n.n+m.n)
-    munit(::Wires)=Boxx(Compose.context(),0,0,0) #this should be an object!  why is Typeclass not throwing an error?
+    munit(::Wires)=Wires(0)  #this should be an object! if used Boxx, why is Typeclass not throwing an error?
 end
 
 # function writemime(stream,::MIME"text/html",c::Boxx)
