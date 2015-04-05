@@ -9,7 +9,6 @@ export dual,transp,ev,coev,tr,Hom,sigma
 export dagger
 export OWord,ObjectWord,MorphismWord #temp
 
-export @minex_str
 
 using Typeclass
 import Base:show,ctranspose,transpose
@@ -87,9 +86,9 @@ end
 function FTS(s::String)
     T=FiniteTensorSignature()
     for mstring in split(s,r"[,\s]\s*") # regex matches , or space and any number of trailing spaces
-        strname,strtype = split(mstring,":") #todo accept trailing space
+        strname,strtype = split(mstring,":") 
         name=symbol(strname)
-        domstr,codstr=split(strtype,"→") #todo accept ->
+        domstr,codstr=contains(strtype,"→")? split(strtype,"→"): split(strtype,"->") 
         domarray = map(symbol, split(domstr,"⊗"))
         codarray = map(symbol, split(codstr,"⊗")) #todo accept \otimes and \ot and V_1 \otc V_n
         #add the primitive object symbols to obvars
@@ -104,15 +103,14 @@ function FTS(s::String)
     T
 end
 
-T=FTS("f:a⊗b→c,g:a→b⊗c")
+# T=FTS("f:a⊗b→c,g:a→b⊗c")        
 
-
-#without quot, works outside module but not in it, with using FiniteTensorSig
-macro minex_str(str)
-    quot(
-    Expr(:global,
-    Expr(:(=),:a,str)))
-end
+# #without quot, works outside module but not in it, with using FiniteTensorSig
+# macro minex_str(str)
+#     quot(
+#     Expr(:global,
+#     Expr(:(=),:a,str)))
+# end
 
 #incomplete:
 #instantiates tensor sig and places its variables in global scope.
