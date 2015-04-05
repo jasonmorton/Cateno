@@ -29,7 +29,7 @@ end
 #Assuming Ob Mor is a MonoidalCategory already
 @class ClosedCompactCategory Ob Mor begin
     dual(A::Ob)::Ob
-    transp(f::Mor)= ev(cod(f))⊗id(dual(dom(f))) ∘ id(dual(cod(f)))⊗f⊗id(dual(dom(f))) ∘id(dual(cod(f))) ⊗ coev(dom(f)) #this only works in a strict CCC, because the grouping of the three spaces has to change.  Add associator? (ev(cod(f))⊗id(dual(dom(f)))) ∘ (id(dual(cod(f)))⊗f⊗id(dual(dom(f)))) ∘ associator(dual(cod(f)),dom(f),dual(dom(f)))) ∘ (id(dual(cod(f))) ⊗ coev(dom(f))) #this only works in a strict CCC, because the grouping of the three spaces has to change.  Add associator?
+    transp(f::Mor)= (ev(cod(f))⊗id(dual(dom(f)))) ∘ (id(dual(cod(f)))⊗f⊗id(dual(dom(f)))) ∘(id(dual(cod(f))) ⊗ coev(dom(f))) #this only works in a strict CCC, because the grouping of the three spaces has to change.  Add associator? (ev(cod(f))⊗id(dual(dom(f)))) ∘ (id(dual(cod(f)))⊗f⊗id(dual(dom(f)))) ∘ associator(dual(cod(f)),dom(f),dual(dom(f)))) ∘ (id(dual(cod(f))) ⊗ coev(dom(f))) #this only works in a strict CCC, because the grouping of the three spaces has to change.  Add associator?
     ev(A::Ob)::Mor
     coev(A::Ob)::Mor
     Hom(A::Ob,B::Ob)=dual(A)⊗B
