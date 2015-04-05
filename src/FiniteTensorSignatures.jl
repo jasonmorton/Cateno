@@ -65,12 +65,17 @@ nullsig = FiniteTensorSignature()
 otreestring(otree)=join(flattenotree(otree),⊗)
 flattenotree(w::Symbol)=[w]
 function flattenotree(w::Expr)
-    list=Symbol[]
 #    @assert w.head==:call && w.args[1]==⊗
-    left=w.args[2]
-    right=w.args[3]
-    append!(list,flattenotree(left))
-    append!(list,flattenotree(right))
+#    println(w, w==:())
+    if w==:()
+        [:I]
+    else
+        list=Symbol[]
+        left=w.args[2]
+        right=w.args[3]
+        append!(list,flattenotree(left))
+        append!(list,flattenotree(right))
+    end
 end
 
 
@@ -238,7 +243,7 @@ end
     function otimes(A::ObjectWord,B::ObjectWord)
         ObjectWord(A.contents ⊗ B.contents, tsjoin(A,B))
     end
-    munit(::ObjectWord)=ObjectWord(Array{Symbol,1}[],nullsig)    
+    munit(::ObjectWord)=ObjectWord(OWord(:()),nullsig)    
 end
 
 
@@ -249,16 +254,18 @@ end
 
 #---------------------------------------------------------------------------------
 
+
 #Assuming Ob Mor is a MonoidalCategory already
-@class ClosedCompactCategory Ob Mor begin
-    dual(A::Ob)::Ob
-    transp(f::Mor)=id(dual(cod(f))) ⊗ coev(dom(f)) | id(dual(cod(f)))⊗f⊗id(dual(dom(f))) | ev(cod(f))⊗id(dual(dom(f)))
-    ev(A::Ob)::Mor
-    coev(A::Ob)::Mor
-    Hom(A::Ob,B::Ob)=dual(A)⊗B
-    sigma(A::Ob,B::Ob)::Mor
-    tr(f::Mor) = (ev(dom(f))) ∘ (id(dual(dom(f))) ⊗ f) ∘ coev(dual(dom(f))) #or the other way
-end
+#check unchanged
+# @class ClosedCompactCategory Ob Mor begin
+#     dual(A::Ob)::Ob
+#     transp(f::Mor)=id(dual(cod(f))) ⊗ coev(dom(f)) | id(dual(cod(f)))⊗f⊗id(dual(dom(f))) | ev(cod(f))⊗id(dual(dom(f)))
+#     ev(A::Ob)::Mor
+#     coev(A::Ob)::Mor
+#     Hom(A::Ob,B::Ob)=dual(A)⊗B
+#     sigma(A::Ob,B::Ob)::Mor
+#     tr(f::Mor) = (ev(dom(f))) ∘ (id(dual(dom(f))) ⊗ f) ∘ coev(dual(dom(f))) #or the other way
+# end
 
 
 #----------------
@@ -266,7 +273,16 @@ end
 #A_ convention for symbol for now
 #morphisms are :ev, :coev, :sigma
 
-
+function toggledual(o::OWord)
+    if isa(o.word,Symbol)
+        OWord(toggledual(o.word))
+    elseif o.word.head==:call && o.word.args[1]==:⊗ 
+        OWord(toggledual(o.word.args[2]) ⊗ toggledual(o.word.args[3]))
+    else
+        error("can't dualize")
+    end
+end
+                   
 function toggledual(s::Symbol)
     st=string(s)
     if s==:I
@@ -279,20 +295,23 @@ function toggledual(s::Symbol)
 end
 
 
+
+
+
 # Assume OWord, MWord are a MonoidalCategory
 @instance ClosedCompactCategory OWord MWord  begin
-    dual(A::OWord)=map(toggledual,A)
+    dual(A::OWord)=toggledual(A) #was map(tog,A)
 #    transp(f::Mor)=id(cod(f)) ⊗ coev(dom(f)) | id(cod(f))⊗f⊗id(dom(f)) | ev(cod(f))⊗id(dom(f))
-    ev(A::OWord)=Expr(:call,:ev,A)     #A*⊗A→I
-    coev(A::OWord)=Expr(:call,:coev,A) #I→A⊗A*
+    ev(A::OWord)=Expr(:call,:ev,A.word)     #A*⊗A→I
+    coev(A::OWord)=Expr(:call,:coev,A.word) #I→A⊗A*
 #    Hom(A::Ob,B::Ob)=dual(A)⊗B
-    sigma(A::OWord,B::OWord)=Expr(:call,:σ,A,B)  #A⊗B→B⊗A
+    sigma(A::OWord,B::OWord)=Expr(:call,:σ,A.word,B.word)  #A⊗B→B⊗A
 #    tr(f::Mor) = (ev(dual(dom(f)))) ∘ (f ⊗ id(dual(dom(f)))) ∘ coev(dom(f))
 end
 
 
 @instance ClosedCompactCategory ObjectWord MorphismWord begin
-    dual(A::ObjectWord)=ObjectWord(map(toggledual,A.contents),A.signature)
+    dual(A::ObjectWord)=ObjectWord(toggledual(A.contents),A.signature)
     ev(A::ObjectWord)=MorphismWord(ev(A.contents),A.signature,dual(A)⊗A,munit(A))
     coev(A::ObjectWord)=MorphismWord(coev(A.contents),A.signature,munit(A),A⊗dual(A))
     sigma(A::ObjectWord,B::ObjectWord)=MorphismWord(sigma(A.contents,B.contents), A.signature, A⊗B, B⊗A)
