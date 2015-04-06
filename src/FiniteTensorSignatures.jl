@@ -14,23 +14,34 @@ using Typeclass
 import Base:show,ctranspose,transpose
 import Base.Meta.quot
 
-#Represent words in $\mathcal{T}^{\circ,\ot}$ as raw Julia expressions with no TS or dom/cod checking, for internal use only
+#-------------------------------------------------------------------------------
+# First, we represent words in $\mathcal{T}^{\circ,\ot}$ as raw Julia 
+# expressions with no TS or dom/cod checking, primarily for internal use 
+# in this module.  This is still a monoidal category, but with only one 
+# object, was represented as nothing, where nothing ⊗ nothing = nothing, 
+# now use the more consistent OWord( :() ), a wrapped empty expression
+
+# We can get away with one typealias, but if both were not wrapped, we 
+# would have dispatch ambiguities.  Should probably make MWords wrapped 
+# expressions as well.
+#-------------------------------------------------------------------------------
 typealias MWord Union(Expr,Symbol)
 
 type OWord
     word::Union(Expr,Symbol)
 end
-==(u::OWord,v::OWord)=flattenotree(u.word)==flattenotree(v.word) #assoc compare
+# This causes object words to be treated as strictly associative in 
+# comparisons, so (A⊗B)⊗C == A⊗(B⊗C). The monoidal unit is defined as 
+# OWord( :() )
+==(u::OWord,v::OWord)=flattenotree(u.word)==flattenotree(v.word) 
 
-
-#typealias OWord Union(Expr,Symbol)
 @instance MonoidalCategory OWord MWord  begin
-    dom(f::MWord)=nothing
-    cod(f::MWord)=nothing
+    dom(f::MWord)=OWord(:()) #was nothing
+    cod(f::MWord)=OWord(:()) #was nothing
     id(A::OWord)=Expr(:call,:id,A.word)
     compose(f::MWord,g::MWord)=Expr(:call,:∘,f,g)  
     otimes(f::MWord,g::MWord)=Expr(:call,:⊗,f,g) 
-    function otimes(A::OWord,B::OWord)
+    function otimes(A::OWord,B::OWord) #strict unitors
         if A.word==:()==B.word
             OWord(:())
         elseif A.word==:()
@@ -38,14 +49,11 @@ end
         elseif B.word==:()
             A
         else
-            OWord(Expr(:call,:⊗,A.word,B.word)) #not strictly associative, maybe make associative by looking down.
+            OWord(Expr(:call,:⊗,A.word,B.word)) 
         end
     end
     munit(::OWord)=OWord(:())
 end
-
-
-
 
 
 #A finite tensor signature consists of a finite set of object and morphism variables, together with cod, dom functions.
@@ -87,49 +95,50 @@ end
 
 
 # FTS("f:a⊗b→c,g:a→b⊗c")
-#todo how do I specify monoidal unit?  Now just I then assign in interp.
+# Monoidal unit domain or codomain is treated separately as a special case
 function FTS(s::String)
     T=FiniteTensorSignature()
-    for mstring in split(s,r"[,\s]\s*") # regex matches , or space and any number of trailing spaces
+    for mstring in split(s,r"[,\s]\s*") # regex matches "," or " " and any number of trailing spaces
         strname,strtype = split(mstring,":") 
         name=symbol(strname)
         domstr,codstr=contains(strtype,"→")? split(strtype,"→"): split(strtype,"->") 
         domarray = map(symbol, split(domstr,"⊗"))
-        codarray = map(symbol, split(codstr,"⊗")) #todo accept \otimes and \ot and V_1 \otc V_n
-        #add the primitive object symbols to obvars
-        union!(T.obvars,domarray)
-        union!(T.obvars,codarray)
-        #add the morphism symbols to morvars
+        codarray = map(symbol, split(codstr,"⊗")) #todo accept \otimes and \ot 
+        # and V_1 \otc V_n
+        
+        #add the primitive object symbols to obvars unless monoidal unit
+        domarray==[:I]? nothing: union!(T.obvars,domarray)
+        codarray==[:I]? nothing: union!(T.obvars,codarray)
+        #add the morphism symbol to morvars
         union!(T.morvars,[name])
         #in this model the dom and cod are ⊗-trees
-        T.dom[name]=foldl(⊗,map(OWord,domarray))
-        T.cod[name]=foldl(⊗,map(OWord,codarray))
+        T.dom[name]= domarray==[:I]? OWord(:()) : foldl(⊗,map(OWord,domarray))
+        T.cod[name]= codarray==[:I]? OWord(:()) : foldl(⊗,map(OWord,codarray))
     end   
     T
 end
 
-# T=FTS("f:a⊗b→c,g:a→b⊗c")        
-
-# #without quot, works outside module but not in it, with using FiniteTensorSig
-# macro minex_str(str)
-#     quot(
-#     Expr(:global,
-#     Expr(:(=),:a,str)))
-# end
-
-#incomplete:
+#fts"f:A→A, g:I->A⊗B" =>fts is named "T" by default
+#fts"S;f:A→A, g:I->A⊗B" =>fts is named S
 #instantiates tensor sig and places its variables in global scope.
 macro fts_str(str)
+    #extract desired name for fts
+    if contains(str,";")
+        ftsname=symbol(split(str,";")[1])
+        str=split(str,";")[2]
+    else 
+        ftsname=:T #default name
+    end
     T=FTS(str)
     block=Expr(:block)
-    # to do: us a let in this line to not name it?
-    Tdecl=Expr(:(=), :T, Expr(:call, :FTS, str))
+    # to do: use a let in this line to not name it, or accept a name in str
+    Tdecl=Expr(:(=), ftsname, Expr(:call, :FTS, str))
     push!(block.args,Tdecl)
     for morphism_variable_symbol in T.morvars
         quotedsymbol = quot(morphism_variable_symbol)
         morphism_name_decl=Expr(:(=),
                        morphism_variable_symbol, #LHS
-                       Expr(:call,:MW,quotedsymbol,:T), #RHS
+                       Expr(:call,:MW,quotedsymbol,ftsname), #RHS
                        true)#cargo)
         push!(block.args,morphism_name_decl)
     end
@@ -139,17 +148,19 @@ macro fts_str(str)
         object_name_decl=Expr(:(=),
                               object_variable_symbol, #LHS
                               Expr(:call,:(FiniteTensorSignatures.ObjectWord),
-                                   Expr(:call, :OWord, quotedsymbol),:T), #RHS
+                                   Expr(:call, :OWord, quotedsymbol),ftsname), #RHS
                               true)
         push!(block.args,object_name_decl)
     end
-    push!(block.args,:T) #return the tensor scheme, change after let
+    push!(block.args,ftsname) #return the tensor scheme, change after let
 #    block
 #    Expr(:block,block,nothing)
 #    info(T,"'s variables added to global scope")
-    quot(block)
+
+#    quot(block) #eval(fts"f:a→b") 
+    esc(block) #like eval (@macro creating block)
 end
-#eval(fts"f:a→b") now works
+
 
 #An object expression which remembers its FiniteTensorSignature
 type ObjectWord #{FiniteTensorSignature}
@@ -164,7 +175,9 @@ end
 function ==(A::ObjectWord,B::ObjectWord)
     A.contents==B.contents && A.signature == B.signature
 end
-
+# I is a reserved word now, this allows it to also function as monoidal unit
+⊗(A::ObjectWord,I::UniformScaling)=A
+⊗(I::UniformScaling,A::ObjectWord)=A
 
 
 #towards a conversion or promotion mechanism
@@ -176,7 +189,11 @@ function tsjoin(f,g)
     elseif g.signature == nullsig
         return f.signature
     else
-        error("TS cannot be joined")
+        FiniteTensorSignature(
+                              union(f.signature.obvars,g.signature.obvars),
+                              union(f.signature.morvars,g.signature.morvars),
+                              merge(f.signature.dom,g.signature.dom),
+                              merge(f.signature.cod,g.signature.cod))
     end
 end
 
@@ -245,27 +262,6 @@ end
     end
     munit(::ObjectWord)=ObjectWord(OWord(:()),nullsig)    
 end
-
-
-#T=FiniteTensorSignature([:A,:B],[:f,:g],{:f=>[:A],:g=>[:B]},{:f=>[:B],:g=>[:A]})
-#T=FTS("f:a⊗b→c,g:a→b⊗c,h:a→a⊗b")
-#MW(:f ⊗ :h,T)
-#⊗(f,h):a⊗b⊗a→c⊗a⊗b over h:a→a⊗b,g:a→b⊗c,f:a⊗b→c,
-
-#---------------------------------------------------------------------------------
-
-
-#Assuming Ob Mor is a MonoidalCategory already
-#check unchanged
-# @class ClosedCompactCategory Ob Mor begin
-#     dual(A::Ob)::Ob
-#     transp(f::Mor)=id(dual(cod(f))) ⊗ coev(dom(f)) | id(dual(cod(f)))⊗f⊗id(dual(dom(f))) | ev(cod(f))⊗id(dual(dom(f)))
-#     ev(A::Ob)::Mor
-#     coev(A::Ob)::Mor
-#     Hom(A::Ob,B::Ob)=dual(A)⊗B
-#     sigma(A::Ob,B::Ob)::Mor
-#     tr(f::Mor) = (ev(dom(f))) ∘ (id(dual(dom(f))) ⊗ f) ∘ coev(dual(dom(f))) #or the other way
-# end
 
 
 #----------------

@@ -22,14 +22,14 @@ import Base:show,ctranspose,transpose
     |(f::Mor,g::Mor)=compose(g,f)
     ⊗(f::Mor,g::Mor)=otimes(f,g)
     ⊗(A::Ob,B::Ob)=otimes(A,B) 
-    #⊗(A:Array{Ob})=foldl(⊗,A) # not quite but something like this is needed
+    #⊗(As:Array{Ob})=foldl(⊗,As) # not quite but something like this is needed
     ^(f::Mor,ex::Array{Any,2})= ex[1]==⊗? foldl(⊗,[f for i=1:ex[2]]): ex[1]==∘? foldl(∘,[f for i=1:ex[2]]):error("invalid exponent")
 end
 
 #Assuming Ob Mor is a MonoidalCategory already
 @class ClosedCompactCategory Ob Mor begin
     dual(A::Ob)::Ob
-    transp(f::Mor)= (ev(cod(f))⊗id(dual(dom(f)))) ∘ (id(dual(cod(f)))⊗f⊗id(dual(dom(f)))) ∘(id(dual(cod(f))) ⊗ coev(dom(f))) #this only works in a strict CCC, because the grouping of the three spaces has to change.  Add associator? (ev(cod(f))⊗id(dual(dom(f)))) ∘ (id(dual(cod(f)))⊗f⊗id(dual(dom(f)))) ∘ associator(dual(cod(f)),dom(f),dual(dom(f)))) ∘ (id(dual(cod(f))) ⊗ coev(dom(f))) #this only works in a strict CCC, because the grouping of the three spaces has to change.  Add associator?
+    transp(f::Mor)= (ev(cod(f))⊗id(dual(dom(f)))) ∘ (id(dual(cod(f)))⊗f⊗id(dual(dom(f)))) ∘(id(dual(cod(f))) ⊗ coev(dom(f))) #this only works in a strict CCC, because the grouping of the three spaces has to change.  We could check if strict and add associators to the expression.
     ev(A::Ob)::Mor
     coev(A::Ob)::Mor
     Hom(A::Ob,B::Ob)=dual(A)⊗B
@@ -39,17 +39,8 @@ end
     transpose(f::Mor)=transp(f) # f.' notation
 end
 
-
+#Assuming Ob Mor is a CCC
 # @class NonstrictClosedCompactCategory Ob Mor begin
-#     dual(A::Ob)::Ob
-#     transp(f::Mor)= ev(cod(f))⊗id(dual(dom(f))) ∘ id(dual(cod(f)))⊗f⊗id(dual(dom(f))) ∘id(dual(cod(f))) ⊗ coev(dom(f)) #this only works in a strict CCC, because the grouping of the three spaces has to change.  Add associator? (ev(cod(f))⊗id(dual(dom(f)))) ∘ (id(dual(cod(f)))⊗f⊗id(dual(dom(f)))) ∘ associator(dual(cod(f)),dom(f),dual(dom(f)))) ∘ (id(dual(cod(f))) ⊗ coev(dom(f))) #this only works in a strict CCC, because the grouping of the three spaces has to change.  Add associator?
-#     ev(A::Ob)::Mor
-#     coev(A::Ob)::Mor
-#     Hom(A::Ob,B::Ob)=dual(A)⊗B
-#     sigma(A::Ob,B::Ob)::Mor
-#     tr(f::Mor) = (ev(dom(f))) ∘ (id(dual(dom(f))) ⊗ f) ∘ coev(dual(dom(f))) #or the other way
-#     #syntax
-#     transpose(f::Mor)=transp(f) # f.' notation
 #     leftunitor(f::Mor,id::Mor)
 # end
 
@@ -67,13 +58,19 @@ comperr(f,g)=error("Domain $(dom(f)) unequal to codomain $(cod(g))")
 
 
 
-end
+
 
 #next: tests for this functionality, including Interpretations
 #Then: dungeon and SRel (or just implement BP for SRel)
-#Then: Graphical orbit calculations
 #Then: numerical word problems (HDRA/QPL)
 #Then: MC enriched over vector spaces so we can 3f+g
 
+@class AbEnrichedCategory Ob Mor begin
+    +(f::Mor,g::Mor)::Mor
+    -(f::Mor,g::Mor)::Mor
+    -(f::Mor)::Mor
+    zero(domain::Ob,codomain::Ob)::Mor
+end
 
 
+end
