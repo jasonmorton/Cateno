@@ -11,6 +11,7 @@ using FiniteTensorSignatures
 export Representation
 
 
+#value(obvardict,morvardict,s::Symbol) = s==:I? esc(:I) : haskey(obvardict,s)?obvardict[s]:morvardict[s]
 value(obvardict,morvardict,s::Symbol) = haskey(obvardict,s)?obvardict[s]:morvardict[s]
 value(obvardict,morvardict,o::OWord) = value(obvardict,morvardict,o.word) 
 value(obvardict,morvardict,o::ObjectWord) = value(obvardict,morvardict,o.contents) 
@@ -19,7 +20,7 @@ function value(objectVariableDictionary,morphismVariableDictionary,ex::Expr)
     bindings=[[Expr(:(=),k,v) for (k,v) in objectVariableDictionary];
               [Expr(:(=),k,v) for (k,v) in morphismVariableDictionary]]
     newex=Expr(:let,ex,bindings...)
-    eval(newex)
+    eval(newex) #try esc
 end
 
 type Representation#{ObjectType,MorphismType}
@@ -31,17 +32,19 @@ type Representation#{ObjectType,MorphismType}
     #inner cons enforcing all obj and mor mapped, and that dom cods match
     function Representation(T,X,od,md)
         function F(ex)
-            value(od,md,ex)
+            examplemorphismofQ=[i for i in values(md)][1]
+            value(merge({:I=>munit(examplemorphismofQ)},od),md,ex)
+#            value(od,md,ex)
         end
         #todo check that X applies to both cats
-
+#        println(md)
         # check that all morphism variables have been assigned a value 
         # in the representation, and that F respects dom,cod
         for f in T.morvars
             #check that F(f) is defined
             @assert haskey(md,f) error("missing value of ",f)
             #check that dom(F(f))==F(dom(f))
-            @assert F(T.dom[f])==dom(F(f))  ("dom(F(f)):",F(T.dom[f])," unequal to F(dom(f)): ",dom(F(f)))
+            @assert F(T.dom[f])==dom(F(f))  ("dom(F($f)):",F(T.dom[f])," unequal to F(dom($f)): ",dom(F(f)))
             #check that cod(F(f))==F(cod(f)) 
             @assert F(T.cod[f])==cod(F(f)) 
         end

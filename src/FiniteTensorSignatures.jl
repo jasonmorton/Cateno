@@ -35,15 +35,17 @@ end
 # OWord( :() )
 ==(u::OWord,v::OWord)=flattenotree(u.word)==flattenotree(v.word) 
 
+I_oword =   OWord(:I) #OWord(:())
+
 @instance MonoidalCategory OWord MWord  begin
-    dom(f::MWord)=OWord(:()) #was nothing
-    cod(f::MWord)=OWord(:()) #was nothing
+    dom(f::MWord)=I_oword #was nothing
+    cod(f::MWord)=I_oword #was nothing
     id(A::OWord)=Expr(:call,:id,A.word)
     compose(f::MWord,g::MWord)=Expr(:call,:∘,f,g)  
     otimes(f::MWord,g::MWord)=Expr(:call,:⊗,f,g) 
     function otimes(A::OWord,B::OWord) #strict unitors
-        if A.word==:()==B.word
-            OWord(:())
+        if A.word==I_oword.word==B.word
+            I_oword
         elseif A.word==:()
             B
         elseif B.word==:()
@@ -52,7 +54,7 @@ end
             OWord(Expr(:call,:⊗,A.word,B.word)) 
         end
     end
-    munit(::OWord)=OWord(:())
+    munit(::OWord)=I_oword
 end
 
 
@@ -112,8 +114,8 @@ function FTS(s::String)
         #add the morphism symbol to morvars
         union!(T.morvars,[name])
         #in this model the dom and cod are ⊗-trees
-        T.dom[name]= domarray==[:I]? OWord(:()) : foldl(⊗,map(OWord,domarray))
-        T.cod[name]= codarray==[:I]? OWord(:()) : foldl(⊗,map(OWord,codarray))
+        T.dom[name]= domarray==[:I]? I_oword : foldl(⊗,map(OWord,domarray))
+        T.cod[name]= codarray==[:I]? I_oword : foldl(⊗,map(OWord,codarray))
     end   
     T
 end
@@ -259,7 +261,7 @@ end
     function otimes(A::ObjectWord,B::ObjectWord)
         ObjectWord(A.contents ⊗ B.contents, tsjoin(A,B))
     end
-    munit(::ObjectWord)=ObjectWord(OWord(:()),nullsig)    
+    munit(::ObjectWord)=ObjectWord(I_oword,nullsig)    
 end
 
 
