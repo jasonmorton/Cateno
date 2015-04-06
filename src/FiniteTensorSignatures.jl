@@ -179,7 +179,7 @@ end
 ⊗(I::UniformScaling,A::ObjectWord)=A
 
 
-#towards a conversion or promotion mechanism
+# combine FiniteTensorSignatures automatically, overwriting conflicts
 function tsjoin(f,g)
     if f.signature == g.signature
         return f.signature
