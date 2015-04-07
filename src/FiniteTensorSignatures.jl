@@ -317,10 +317,10 @@ end
 transpose(f::MorphismWord)=transp(f) #f.' notation
 
 #Assuming Ob Mor is a ClosedCompactCategory already
-@class DaggerClosedCompactCategory Ob Mor begin
-    dagger(A::Ob)=A
-    dagger(f::Mor)=daggerword(f)
-end
+# @class DaggerClosedCompactCategory Ob Mor begin
+#     dagger(A::Ob)=A
+#     dagger(f::Mor)=daggerword(f)
+# end
 
 
 function toggledagger(s::Symbol)
@@ -366,3 +366,8 @@ end
 
 
 
+#using Blink
+#BlinkDisplay.init()
+#media(Boxx,Media.Graphical)
+#pin()
+##then drawings appear and it is beautiful.
