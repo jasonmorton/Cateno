@@ -19,7 +19,7 @@ import Base:show,ctranspose,transpose
     munit(f::Mor)=munit(dom(f))
     # syntax, using unicode
     ∘(f::Mor,g::Mor)=dom(f)==cod(g)?compose(f,g):comperr(f,g)
-    |(f::Mor,g::Mor)=compose(g,f)
+#    |(f::Mor,g::Mor)=compose(g,f)
     ⊗(f::Mor,g::Mor)=otimes(f,g)
     ⊗(A::Ob,B::Ob)=otimes(A,B) 
     #⊗(As:Array{Ob})=foldl(⊗,As) # not quite but something like this is needed
@@ -36,8 +36,10 @@ end
     sigma(A::Ob,B::Ob)::Mor
     tr(f::Mor) = (ev(dom(f))) ∘ (id(dual(dom(f))) ⊗ f) ∘ coev(dual(dom(f))) #or the other way
     #syntax
-    transpose(f::Mor)=transp(f) # f.' notation
+    transpose(f::Mor)=transp(f) # f.' notation.  This by default won't override.
 end
+
+
 
 #Assuming Ob Mor is a CCC
 # @class NonstrictClosedCompactCategory Ob Mor begin

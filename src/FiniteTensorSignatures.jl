@@ -294,9 +294,10 @@ end
 
 
 
+#CCCs are declared with @instance! since we need to override the default Julia transpose method, which applies to any type transpose(x)=x in operators.jl
 
 # Assume OWord, MWord are a MonoidalCategory
-@instance ClosedCompactCategory OWord MWord  begin
+@instance! ClosedCompactCategory OWord MWord  begin
     dual(A::OWord)=toggledual(A) #was map(tog,A)
 #    transp(f::Mor)=id(cod(f)) ⊗ coev(dom(f)) | id(cod(f))⊗f⊗id(dom(f)) | ev(cod(f))⊗id(dom(f))
     ev(A::OWord)=Expr(:call,:ev,A.word)     #A*⊗A→I
@@ -307,14 +308,14 @@ end
 end
 
 
-@instance ClosedCompactCategory ObjectWord MorphismWord begin
+@instance! ClosedCompactCategory ObjectWord MorphismWord begin
     dual(A::ObjectWord)=ObjectWord(toggledual(A.contents),A.signature)
     ev(A::ObjectWord)=MorphismWord(ev(A.contents),A.signature,dual(A)⊗A,munit(A))
     coev(A::ObjectWord)=MorphismWord(coev(A.contents),A.signature,munit(A),A⊗dual(A))
     sigma(A::ObjectWord,B::ObjectWord)=MorphismWord(sigma(A.contents,B.contents), A.signature, A⊗B, B⊗A)
 end
 
-transpose(f::MorphismWord)=transp(f) #f.' notation
+#transpose(f::MorphismWord)=transp(f) #f.' notation # in CCC definition
 
 #Assuming Ob Mor is a ClosedCompactCategory already
 # @class DaggerClosedCompactCategory Ob Mor begin
@@ -350,7 +351,8 @@ function daggerword(word::Expr)
     end
 end
 
-@instance DaggerClosedCompactCategory ObjectWord MorphismWord begin
+#@instance! to override default ctranspose no op.
+@instance! DaggerClosedCompactCategory ObjectWord MorphismWord begin
     dagger(f::MorphismWord)=MorphismWord(daggerword(f.contents),f.signature,f.cod,f.dom)
 end
 
