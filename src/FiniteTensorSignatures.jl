@@ -189,12 +189,14 @@ function tsjoin(f,g)
         return g.signature
     elseif g.signature == nullsig
         return f.signature
-    else
+    elseif isempty(intersect(f.signature.morvars,g.signature.morvars))
         FiniteTensorSignature(
                               union(f.signature.obvars,g.signature.obvars),
                               union(f.signature.morvars,g.signature.morvars),
                               merge(f.signature.dom,g.signature.dom),
                               merge(f.signature.cod,g.signature.cod))
+    else
+        error("Could not merge tensor signatures. Do the morphism variables ",f.signature.morvars," and ",g.signature.morvars," have nonemtpy intersection?")
     end
 end
 
