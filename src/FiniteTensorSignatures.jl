@@ -76,7 +76,6 @@ otreestring(otree)=join(flattenotree(otree),⊗)
 flattenotree(w::Symbol)=[w]
 function flattenotree(w::Expr)
 #    @assert w.head==:call && w.args[1]==⊗
-#    println(w, w==:())
     if w==:()
         [:I]
     else
@@ -160,6 +159,26 @@ macro fts_str(str)
 
 #    quot(block) #eval(fts"f:a→b") 
     esc(block) #like eval (@macro creating block)
+end
+
+
+# macro ftsd_str(str)
+#     @fts_str str
+# end
+
+
+#automatically compute a diagram interpretation from a finite tensor signature
+#second argument is the kind of category, eg. MC, CCC, DCCC.
+function diagramsfor(T::FiniteTensorSignature,X::Class)
+    eval( Expr(:using,:WiresBoxes))
+    mordict={}
+    obdict={}
+    for mv in T.morvars
+        mv_domain = Wires(length(T.dom[mv]))
+        mv_codomain = Wires(length(T.cod[mv]))
+        mv_label = mv
+        mordict[mv] = mbox(mv_domain, mv_codomain, string(mv_label))
+    end
 end
 
 
