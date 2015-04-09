@@ -2,7 +2,7 @@ module IntMat
 
 using Typeclass,MonoidalCategories
 
-import MonoidalCategories:MonoidalCategory,dom,cod,id,munit,⊗,∘
+import MonoidalCategories:MonoidalCategory,dom,cod,id,munit,⊗,∘,σ
 export dom,cod,id,munit,⊗,∘
 
 import MonoidalCategories:ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
