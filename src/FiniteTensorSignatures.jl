@@ -19,31 +19,46 @@ import Base.length
 # First, we represent words in $\mathcal{T}^{\circ,\ot}$ as raw Julia 
 # expressions with no TS or dom/cod checking, primarily for internal use 
 # in this module.  This is still a monoidal category, but with only one 
-# object, was represented as nothing, where nothing ⊗ nothing = nothing, 
-# now use the more consistent OWord( :() ), a wrapped empty expression
+# object, represented as OWord( :I ).
 
 # We can get away with one typealias, but if both were not wrapped, we 
 # would have dispatch ambiguities.  Should probably make MWords wrapped 
 # expressions as well.
+#
+# For strictness we set f⊗id(I) = f = f ∘ id(I); these should be distinguished
+# in the weak version
 #-------------------------------------------------------------------------------
 typealias MWord Union(Expr,Symbol)
 
 type OWord
     word::Union(Expr,Symbol)
 end
+
 # This causes object words to be treated as strictly associative in 
-# comparisons, so (A⊗B)⊗C == A⊗(B⊗C). The monoidal unit is defined as 
-# OWord( :() )
+# comparisons, so (A⊗B)⊗C == A⊗(B⊗C). 
 ==(u::OWord,v::OWord)=flattenotree(u.word)==flattenotree(v.word) 
 
+# The monoidal unit is defined as 
 I_oword =   OWord(:I) #OWord(:())
+id_I_oword= Expr(:call,:id,:I)
 
 @instance MonoidalCategory OWord MWord  begin
     dom(f::MWord)=I_oword #was nothing
     cod(f::MWord)=I_oword #was nothing
     id(A::OWord)=Expr(:call,:id,A.word)
     compose(f::MWord,g::MWord)=Expr(:call,:∘,f,g)  
-    otimes(f::MWord,g::MWord)=Expr(:call,:⊗,f,g) 
+#    otimes(f::MWord,g::MWord)=Expr(:call,:⊗,f,g) 
+    function otimes(f::MWord,g::MWord)
+        if f==id_I_oword==g
+            id_I_oword
+        elseif f==id_I_oword
+            g
+        elseif g==id_I_oword
+            f
+        else
+            Expr(:call,:⊗,f,g) 
+        end
+    end
     function otimes(A::OWord,B::OWord) #strict unitors
         if A==I_oword==B.word
             I_oword
@@ -310,8 +325,8 @@ end
 @instance! ClosedCompactCategory OWord MWord  begin
     dual(A::OWord)=toggledual(A) #was map(tog,A)
 #    transp(f::Mor)=id(cod(f)) ⊗ coev(dom(f)) | id(cod(f))⊗f⊗id(dom(f)) | ev(cod(f))⊗id(dom(f))
-    ev(A::OWord)=Expr(:call,:ev,A.word)     #A*⊗A→I
-    coev(A::OWord)=Expr(:call,:coev,A.word) #I→A⊗A*
+    ev(A::OWord)=A==I_oword? id_I_oword: Expr(:call,:ev,A.word)     #A*⊗A→I
+    coev(A::OWord)=A==I_oword? id_I_oword: Expr(:call,:coev,A.word) #I→A⊗A*
 #    Hom(A::Ob,B::Ob)=dual(A)⊗B
     sigma(A::OWord,B::OWord)=Expr(:call,:sigma,A.word,B.word)  #A⊗B→B⊗A
 #    tr(f::Mor) = (ev(dual(dom(f)))) ∘ (f ⊗ id(dual(dom(f)))) ∘ coev(dom(f))
