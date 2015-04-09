@@ -45,11 +45,11 @@ I_oword =   OWord(:I) #OWord(:())
     compose(f::MWord,g::MWord)=Expr(:call,:∘,f,g)  
     otimes(f::MWord,g::MWord)=Expr(:call,:⊗,f,g) 
     function otimes(A::OWord,B::OWord) #strict unitors
-        if A.word==I_oword.word==B.word
+        if A==I_oword==B.word
             I_oword
-        elseif A.word==:()
+        elseif A==I_oword
             B
-        elseif B.word==:()
+        elseif B==I_oword
             A
         else
             OWord(Expr(:call,:⊗,A.word,B.word)) 
