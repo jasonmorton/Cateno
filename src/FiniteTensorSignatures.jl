@@ -13,6 +13,7 @@ export OWord,ObjectWord,MorphismWord #temp
 using Typeclass
 import Base:show,ctranspose,transpose
 import Base.Meta.quot
+import Base.length
 
 #-------------------------------------------------------------------------------
 # First, we represent words in $\mathcal{T}^{\circ,\ot}$ as raw Julia 
@@ -86,6 +87,7 @@ function flattenotree(w::Expr)
         append!(list,flattenotree(right))
     end
 end
+length(o::OWord)=length(flattenotree(o.word))
 
 
 function show(io::IO,T::FiniteTensorSignature)
@@ -167,23 +169,6 @@ end
 # end
 
 
-#automatically compute a diagram interpretation from a finite tensor signature
-#second argument is the kind of category, eg. MC, CCC, DCCC.
-#consider placing into show in FTS for MorphismWords
-function diagramsfor(T::FiniteTensorSignature,X::Class)
-    eval( Expr(:using,:WiresBoxes))
-    mordict={}
-    obdict={}
-    for mv in T.morvars
-        mv_domain = Wires(length(T.dom[mv]))
-        mv_codomain = Wires(length(T.cod[mv]))
-        mv_label = mv
-        mordict[mv] = mbox(mv_domain, mv_codomain, string(mv_label))
-    end
-#    if X==CompactClosedCategory
-#        mordict[:ev]=cap
-#    end
-end
 
 
 #An object expression which remembers its FiniteTensorSignature
@@ -328,7 +313,7 @@ end
     ev(A::OWord)=Expr(:call,:ev,A.word)     #A*⊗A→I
     coev(A::OWord)=Expr(:call,:coev,A.word) #I→A⊗A*
 #    Hom(A::Ob,B::Ob)=dual(A)⊗B
-    sigma(A::OWord,B::OWord)=Expr(:call,:σ,A.word,B.word)  #A⊗B→B⊗A
+    sigma(A::OWord,B::OWord)=Expr(:call,:sigma,A.word,B.word)  #A⊗B→B⊗A
 #    tr(f::Mor) = (ev(dual(dom(f)))) ∘ (f ⊗ id(dual(dom(f)))) ∘ coev(dom(f))
 end
 

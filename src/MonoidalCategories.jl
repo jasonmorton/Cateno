@@ -2,7 +2,7 @@
 # together with some utility functions useful for instantiation
 module MonoidalCategories
 export MonoidalCategory,dom,cod,id,munit,⊗,∘,comperr
-export ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
+export ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma,σ
 export DaggerClosedCompactCategory,dagger
 
 using Typeclass
@@ -37,6 +37,7 @@ end
     tr(f::Mor) = (ev(dom(f))) ∘ (id(dual(dom(f))) ⊗ f) ∘ coev(dual(dom(f))) #or the other way
     #syntax
     transpose(f::Mor)=transp(f) # f.' notation.  This by default won't override.
+    σ(A::Ob,B::Ob)=sigma(A,B) #not specializing for some reason
 end
 
 

@@ -133,7 +133,6 @@ end
     coev(n::Wires)=cup
     sigma(n::Wires,m::Wires)=swap
 end
-
 #now f.' just works, draws the swirl
 
 #must be run from toplevel
