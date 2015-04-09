@@ -169,6 +169,7 @@ end
 
 #automatically compute a diagram interpretation from a finite tensor signature
 #second argument is the kind of category, eg. MC, CCC, DCCC.
+#consider placing into show in FTS for MorphismWords
 function diagramsfor(T::FiniteTensorSignature,X::Class)
     eval( Expr(:using,:WiresBoxes))
     mordict={}
@@ -179,6 +180,9 @@ function diagramsfor(T::FiniteTensorSignature,X::Class)
         mv_label = mv
         mordict[mv] = mbox(mv_domain, mv_codomain, string(mv_label))
     end
+#    if X==CompactClosedCategory
+#        mordict[:ev]=cap
+#    end
 end
 
 

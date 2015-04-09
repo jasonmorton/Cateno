@@ -6,7 +6,7 @@ using Compose:Context,context,rectangle,circle,fill #doesn't put in scope
 export dom,cod,id,munit,⊗,∘
 import MonoidalCategories:ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
 export dual,transp,ev,coev,tr,Hom,sigma
-export tdraw,draw,bra,ket,mbox,swap,lines,Boxx,Wires
+export tdraw,draw,bra,ket,mbox,swap,cup,cap,lines,Boxx,Wires
 
 import Base.writemime
 
@@ -110,6 +110,12 @@ swapcon=Compose.compose(swap_underline,Compose.compose(swap_overline("white",2),
 
 swap=Boxx(swapcon,2,2,1)
 
+_cup=Compose.compose(Compose.context(),Compose.curve((0,.75),(.75,.75),(.75,.25),(0,.25)),Compose.stroke(Compose.color("black")),Compose.linewidth(1))
+_cap=Compose.compose(Compose.context(),Compose.curve((1,.75),(.25,.75),(.25,.25),(1,.25)),Compose.stroke(Compose.color("black")),Compose.linewidth(1))
+cup=Boxx(_cup,0,2,1)
+cap=Boxx(_cap,2,0,1)
+
+
 draw(f::Boxx,filename)=tdraw(f.con,filename)
 draw(f::Boxx)=draw(f,"test.svg")
 function tdraw(cont,filename)
@@ -117,5 +123,32 @@ function tdraw(cont,filename)
     Compose.draw(img,cont)
 end
 
+#without arrows first
+@instance! ClosedCompactCategory Wires Boxx begin
+    dual(n::Wires)=n
+    # ev for Wires(2) is cap ⊗ cap ∘ (id(Wires(1)) ⊗ swap ⊗id(Wires(1)))
+    # etc, to fix, use nested
+    #the below only work for Wires(1) now
+    ev(n::Wires)=cap 
+    coev(n::Wires)=cup
+    sigma(n::Wires,m::Wires)=swap
 end
 
+#now f.' just works, draws the swirl
+
+#must be run from toplevel
+# import Blink
+# BlinkDisplay.init()
+# media(Boxx,Media.Graphical)
+# mbox(1,1,"f")
+# pin()
+
+
+
+
+end
+
+
+
+
+##then drawings appear and it is beautiful.

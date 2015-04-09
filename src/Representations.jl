@@ -1,7 +1,8 @@
 module Representations
-# import MonoidalCategories:MonoidalCategory,dom,cod,id,munit,⊗,∘,comperr
-# import MonoidalCategories:ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
-# import MonoidalCategories:DaggerClosedCompactCategory,dagger
+using MonoidalCategories
+#import MonoidalCategories:MonoidalCategory,dom,cod,id,munit,⊗,∘,comperr
+#import MonoidalCategories:ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
+#import MonoidalCategories:DaggerClosedCompactCategory,dagger
 using Typeclass
 using FiniteTensorSignatures
 # export dom,cod,id,munit,⊗,∘
@@ -56,6 +57,7 @@ type Representation#{ObjectType,MorphismType}
         
         # Construct parameterized structure morphisms appropriate for 
         # the kind X of category
+        if X==CompactClosedCategory
         
         # Always we have at least a MonoidalCategory.  We need I, the monoidal 
         # identity, and identity morphisms for each object
