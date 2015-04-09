@@ -46,8 +46,10 @@ end
 #the strategy to get associative ⊗ vertically is to track the total, maximum number of wires.  In the final image, each wire gets the same amount of space above and below.  For horizontal ∘, we use length.  We may also need virtual wires or spacer wires to pad any vertical slices that fall short.
 
 function vstackCons(top,bot)
-    topmax=max(dom(top).n,cod(top).n) #
-    botmax=max(dom(bot).n,cod(bot).n) #
+    topmax=max(dom(top).n,cod(top).n) 
+    topmax=topmax==0?1:topmax # this is not associative since we forget internal number of wires
+    botmax=max(dom(bot).n,cod(bot).n) 
+    botmax=botmax==0?1:botmax # this is not associative since we forget internal number of wires
     inwires=dom(top)⊗dom(bot) #adds them
     outwires=cod(top)⊗cod(bot) #adds them
     M=topmax+botmax
@@ -142,12 +144,15 @@ end
 # mbox(1,1,"f")
 # pin()
 
-
-
-
+bi= quote
+    import Blink
+    BlinkDisplay.init()
+    media(Boxx,Media.Graphical)
+    mbox(1,1,"f")
+    pin()
 end
 
 
-
+end
 
 ##then drawings appear and it is beautiful.
