@@ -114,8 +114,27 @@ swap=Boxx(swapcon,2,2,1)
 
 _cup=Compose.compose(Compose.context(),Compose.curve((0,.75),(.75,.75),(.75,.25),(0,.25)),Compose.stroke(Compose.color("black")),Compose.linewidth(1))
 _cap=Compose.compose(Compose.context(),Compose.curve((1,.75),(.25,.75),(.25,.25),(1,.25)),Compose.stroke(Compose.color("black")),Compose.linewidth(1))
-cup=Boxx(_cup,0,2,1)
-cap=Boxx(_cap,2,0,1)
+cup1=Boxx(_cup,0,2,1)
+cap1=Boxx(_cap,2,0,1)
+
+
+#repetive, refactor
+function cup(n)
+    linelocation=[(i-(1/2))/(2n) for i=1:2n] 
+    pic=Compose.compose(Compose.context(),
+                    [Compose.curve((0,linelocation[i]),(.75,linelocation[i]),(.75,linelocation[i+n]),(0,linelocation[i+n])) for i=1:n]...,
+                    Compose.stroke(Compose.color("black")),Compose.linewidth(1))
+    Boxx(pic,0,2n,1)
+end
+function cap(n)
+    linelocation=[(i-(1/2))/(2n) for i=1:2n] 
+    pic=Compose.compose(Compose.context(),
+                    [Compose.curve((1,linelocation[i]),(.25,linelocation[i]),(.25,linelocation[i+n]),(1,linelocation[i+n])) for i=1:n]...,
+                    Compose.stroke(Compose.color("black")),Compose.linewidth(1))
+    Boxx(pic,2n,0,1)
+end
+
+
 
 
 draw(f::Boxx,filename)=tdraw(f.con,filename)
@@ -129,10 +148,10 @@ end
 @instance! ClosedCompactCategory Wires Boxx begin
     dual(n::Wires)=n
     # ev for Wires(2) is cap ⊗ cap ∘ (id(Wires(1)) ⊗ swap ⊗id(Wires(1)))
-    # etc, to fix, use nested
+    # etc, to fix, use crossed nested
     #the below only work for Wires(1) now
-    ev(n::Wires)=cap 
-    coev(n::Wires)=cup
+    ev(n::Wires)=cap(n.n) 
+    coev(n::Wires)=cup(n.n)
     sigma(n::Wires,m::Wires)=swap
 end
 #now f.' just works, draws the swirl
@@ -146,8 +165,7 @@ end
 
 bi= quote
     import Blink
-    BlinkDisplay.init()
-    media(Boxx,Media.Graphical)
+    BlinkDisplay.init();media(Boxx,Media.Graphical);
     mbox(1,1,"f")
     pin()
 end

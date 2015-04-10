@@ -102,8 +102,7 @@ function flattenotree(w::Expr)
         append!(list,flattenotree(right))
     end
 end
-length(o::OWord)=length(flattenotree(o.word))
-
+length(o::OWord)= o==I_oword? 0: length(flattenotree(o.word))
 
 function show(io::IO,T::FiniteTensorSignature)
     ss=["$(f):$(otreestring(T.dom[f].word))→$(otreestring(T.cod[f].word))" for f in T.morvars]
