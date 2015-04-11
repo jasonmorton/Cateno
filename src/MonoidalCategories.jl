@@ -5,7 +5,7 @@ export MonoidalCategory,dom,cod,id,munit,⊗,∘,comperr
 export ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma,σ
 export DaggerClosedCompactCategory,dagger
 export associator,associatorinv,leftunitor,rightunitor,leftunitorinv,rightunitorinv
-export lrweaktranspose
+#export lrweaktranspose
 
 
 using Typeclass
@@ -50,11 +50,11 @@ end
     # Thus we provide weak versions as utilities, to make nearly-strict CCCs 
     # easier to define.
     # -Left and right unitor weak version
-    shiftdown(A::Ob)=leftunitorinv(A) ∘ rightunitor(A,munit(A)) #A⊗I→A→I⊗A 
-    shiftup(A::Ob)  =rightunitorinv(A) ∘ leftunitor(munit(A),A) #I⊗A→A→A⊗I 
-    lrweaktranspose(f::Mor)= shiftup(dual(dom(f))) ∘ transp(f) ∘ shiftup(dual(cod(f)))
+    # shiftdown(A::Ob)=leftunitorinv(A) ∘ rightunitor(A,munit(A)) #A⊗I→A→I⊗A 
+    # shiftup(A::Ob)  =rightunitorinv(A) ∘ leftunitor(munit(A),A) #I⊗A→A→A⊗I 
+    # lrweaktranspose(f::Mor)= shiftup(dual(dom(f))) ∘ transp(f) ∘ shiftup(dual(cod(f)))
     # -Associator weak version
-    assocweaktranspose(f::Mor)= (ev(cod(f))⊗id(dual(dom(f)))) ∘ (id(dual(cod(f)))⊗f⊗id(dual(dom(f)))) ∘(id(dual(cod(f))) ⊗ coev(dom(f))) 
+    # assocweaktranspose(f::Mor)= (ev(cod(f))⊗id(dual(dom(f)))) ∘ (id(dual(cod(f)))⊗f⊗id(dual(dom(f)))) ∘(id(dual(cod(f))) ⊗ coev(dom(f))) 
     ev(A::Ob)::Mor #A_ \ot A ->I
     coev(A::Ob)::Mor
     Hom(A::Ob,B::Ob)=dual(A)⊗B

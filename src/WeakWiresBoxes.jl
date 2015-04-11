@@ -6,12 +6,12 @@ using Compose:Context,context,rectangle,circle,fill #doesn't put in scope
 export dom,cod,id,munit,⊗,∘
 import MonoidalCategories:ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
 export dual,transp,ev,coev,tr,Hom,sigma
-export tdraw,draw,bra,ket,mbox,swap,cup,cap,lines,Boxx,Wires
+export bra,ket,mbox,swap,cup,cap,lines,Boxx,Wires,perm,lshiftupfortransp,rshiftupfortransp
 
 import MonoidalCategories:associator,associatorinv,leftunitor,rightunitor,leftunitorinv,rightunitorinv
-import MonoidalCategories:lrweaktranspose
+#import MonoidalCategories:lrweaktranspose
 
-import Base.writemime
+import Base:writemime,length
 
 ############# Basic defintions and instance declaration ################
 type Wires  
@@ -20,7 +20,9 @@ end
 ==(w::Wires,z::Wires)=w.signs==z.signs
 Wires(signs::Array{Int,2})=Wires(vec(signs))
 Wires(n::Int)=Wires(sign(n)*ones(Int,abs(n)))
+length(w::Wires)=length(w.signs)
 
+#weak Boxx should always have same *number* of in and out wires, although not direction/object necessarily.
 type Boxx    
     con::Context   #The Compose.jl Context that holds the drawing
     inwires::Wires
@@ -30,6 +32,7 @@ end
 Boxx(c,n::Array{Int},m::Array{Int},ell)=Boxx(c,Wires(n),Wires(m),ell) 
 Boxx(c,n::Int,m::Int,ell)=Boxx(c,Wires(n),Wires(m),ell) 
 writemime(io::IO, m::MIME"image/svg+xml", b::Boxx)=writemime(io::IO, m, b.con)
+
 
 @instance MonoidalCategory Wires Boxx begin #UnitorWeakMC
     dom(c::Boxx)=c.inwires
@@ -122,13 +125,24 @@ ket(n)=ket(n,"")
 bra(n)=bra(n,"")
 
 boxwithtext(txt)=Compose.compose(Compose.context(),Compose.rectangle(0,.05,1,.9),Compose.fill(Compose.RGBA{Float64}(0,0,0,0)),Compose.stroke(Compose.color("black")),Compose.text(.5,.55,txt)) #.5 -1textwidth, .5+1textheight is what we want
-mbox(n,m,txt) = Boxx(hstackcontexts(lines(m),boxwithtext(txt),lines(n)),Wires(n),Wires(m),1)
-Boxx(n,m,txt)=mbox(n,m,txt)
-mbox(n,m)=mbox(n,m,"")
-Boxx(n,m)=mbox(n,m)
-#todo:Box and bra ket with I spacers
 
-#todo: make an arbitrary permutation picture and local perm picture
+
+#Weak mboxes are padded so number of wires is the same coming in and going out
+function mbox(w::Wires,v::Wires,txt)
+    nwires=max(length(w.signs),length(v.signs))
+    new_w=zeros(Int,nwires)
+    new_v=zeros(Int,nwires)
+    new_w[1:length(w.signs)]=w.signs
+    new_v[1:length(v.signs)]=v.signs
+    Boxx(hstackcontexts(lines(new_v),boxwithtext(txt),lines(new_w)),w,v,1)
+end
+mbox(w::Wires,v::Wires)=mbox(w,v,"")
+mbox(n::Int,m::Int,txt)=mbox(Wires(n),Wires(m),txt)
+mbox(n::Int,m::Int)=mbox(n,m,"")
+Boxx(n::Int,m::Int,txt)=mbox(n,m,txt)
+Boxx(n::Int,m::Int)=mbox(n,m)
+
+
 swap_underline=Compose.compose(Compose.context(),Compose.curve((0,.75),(.7,.75),(.3,.25),(1,.25)),Compose.stroke(Compose.color("black")),Compose.linewidth(1))
 swap_overline(col,wid)=Compose.compose(Compose.context(),Compose.curve((0,.25),(.7,.25),(.3,.75),(1,.75)),Compose.stroke(Compose.color(col)),Compose.linewidth(wid))
 swapcon=Compose.compose(swap_underline,Compose.compose(swap_overline("white",2),swap_overline("black",1)))
@@ -145,24 +159,28 @@ function perm(w::Wires,π::Array)
         y=(i-.5)/N
         y1=linelocation[π[i]]
         if w.signs[i]==-1
-            thisline=[Compose.curve((0,y),(.7,y),(.3,y1),(1,y1)),
-                      Compose.line([(.1,y),(.05,y-.05)]),
-                      Compose.line([(.1,y),(.05,y+.05)])]
+            thisline=[Compose.curve((0,y1),(.7,y1),(.3,y),(1,y)),
+                      Compose.line([(.1,y1),(.05,y1-.05)]),
+                      Compose.line([(.1,y1),(.05,y1+.05)])]
         elseif w.signs[i]==1
-            thisline=[Compose.curve((0,y),(.7,y),(.3,y1),(1,y1)),
-                      Compose.line([(.1,y),(.15,y-.05)]),
-                      Compose.line([(.1,y),(.15,y+.05)])]
+            thisline=[Compose.curve((0,y1),(.7,y1),(.3,y),(1,y)),
+                      Compose.line([(.1,y1),(.15,y1-.05)]),
+                      Compose.line([(.1,y1),(.15,y1+.05)])]
         elseif w.signs[i]==0
-            thisline=[Compose.line([(.45,y),(.55,y1)])]
+            thisline=[]
+#            thisline=[Compose.line([(.45,y1),(.55,y)])]
         else
             error("invalid line")
         end
         append!(lineContexts,thisline)
     end
-    Compose.compose(Compose.context(),Compose.stroke(Compose.color("black")),Compose.linewidth(1),lineContexts...)
+    piwsigns=zeros(Int,N)
+    for i in 1:N
+        piwsigns[π[i]]=w.signs[i]
+    end
+    piw=Wires(piwsigns)
+    Boxx(Compose.compose(Compose.context(),Compose.stroke(Compose.color("black")),Compose.linewidth(1),lineContexts...),w,piw,1)
 end
-
-#        swap_underline=Compose.compose(Compose.context(),Compose.curve((0,.75),(.7,.75),(.3,.25),(1,.25)),Compose.stroke(Compose.color("black")),Compose.linewidth(1))
 
 
 function cup(w::Wires) #coev
@@ -186,15 +204,30 @@ cup(n::Int)=cup(Wires(n))
 
 #left and right unitors
 #f.' ∘(Boxx(WiresBoxes.swap_overline("black",1),1,1,1)⊗id(munit(Wires(1))))
-
-# ell1=Boxx(WiresBoxes.swap_overline("black",1),2,2,1) 
-
+#actually in weak cat, dom and cod of a Boxx should always have same number of wires.
+function rshiftupfortransp(f::Boxx)
+    nfdom=length(dom(f).signs)
+    nfcod=length(cod(f).signs)
+    π=vcat( (nfcod+1):(nfcod+nfcod), 1:nfcod, (nfdom+nfcod+1):(nfdom+nfcod+nfdom) ) #middle,beginning,ending
+    perm(Wires(vcat(zeros(Int,nfcod),dual(cod(f)).signs,zeros(Int,nfdom)) )  ,π)
+end
+function lshiftupfortransp(f::Boxx)
+    nfdom=length(dom(f).signs)
+    nfcod=length(cod(f).signs)
+    π=vcat( 1:nfcod, (nfdom+nfcod+1):(nfdom+nfcod+nfdom),(nfcod+1):(nfcod+nfcod) ) #beginning, ending, middle
+    perm(Wires(vcat(zeros(Int,nfcod),zeros(Int,nfdom),dual(cod(f)).signs) )  ,π)
+end
 
 @instance! ClosedCompactCategory Wires Boxx begin
     dual(w::Wires)=Wires(-w.signs)
     ev(w::Wires)  =cap(w) 
     coev(w::Wires)=cup(w)
-    sigma(n::Wires,m::Wires)=swap #FIX
+    transpose(f::Boxx)= lshiftupfortransp(f) ∘ transp(f) ∘ rshiftupfortransp(f)
+    function sigma(w::Wires,v::Wires)
+        n=length(w.signs)
+        m=length(v.signs)
+        perm(w⊗v,vcat( (n+1):(n+m),1:n ))
+    end
 end
 
 
