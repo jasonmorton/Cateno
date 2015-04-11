@@ -29,7 +29,7 @@ import Base:show,ctranspose,transpose
     ⊗(As::Array{Mor})=foldl(⊗,As) 
     ^(f::Mor,ex::Array{Any,2})= ex[1]==⊗? foldl(⊗,[f for i=1:ex[2]]): ex[1]==∘? foldl(∘,[f for i=1:ex[2]]):error("invalid exponent")
     # default strict, but stubs in case needed.  WeakMC also should be defined
-    associator(A::Ob,B::Ob,C::Ob)=id(A⊗B⊗C) 
+    associator(A::Ob,B::Ob,C::Ob)=id(A⊗B⊗C) #foldl->foldr
     associatorinv(A::Ob,B::Ob,C::Ob)=id(A⊗B⊗C) 
     leftunitor(I::Ob,A::Ob)=id(A) #I⊗A→A
     rightunitor(A::Ob,I::Ob)=id(A)#A⊗I→A
@@ -55,7 +55,7 @@ end
     lrweaktranspose(f::Mor)= shiftup(dual(dom(f))) ∘ transp(f) ∘ shiftup(dual(cod(f)))
     # -Associator weak version
     assocweaktranspose(f::Mor)= (ev(cod(f))⊗id(dual(dom(f)))) ∘ (id(dual(cod(f)))⊗f⊗id(dual(dom(f)))) ∘(id(dual(cod(f))) ⊗ coev(dom(f))) 
-    ev(A::Ob)::Mor
+    ev(A::Ob)::Mor #A_ \ot A ->I
     coev(A::Ob)::Mor
     Hom(A::Ob,B::Ob)=dual(A)⊗B
     sigma(A::Ob,B::Ob)::Mor

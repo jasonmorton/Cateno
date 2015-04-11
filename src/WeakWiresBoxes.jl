@@ -126,6 +126,7 @@ mbox(n,m,txt) = Boxx(hstackcontexts(lines(m),boxwithtext(txt),lines(n)),Wires(n)
 Boxx(n,m,txt)=mbox(n,m,txt)
 mbox(n,m)=mbox(n,m,"")
 Boxx(n,m)=mbox(n,m)
+#todo:Box and bra ket with I spacers
 
 #todo: make an arbitrary permutation picture and local perm picture
 swap_underline=Compose.compose(Compose.context(),Compose.curve((0,.75),(.7,.75),(.3,.25),(1,.25)),Compose.stroke(Compose.color("black")),Compose.linewidth(1))
@@ -134,6 +135,34 @@ swapcon=Compose.compose(swap_underline,Compose.compose(swap_overline("white",2),
 
 swap=Boxx(swapcon,[1 1],[1 1],1)
 
+
+#swaps, unitors, lines, etc all special cases of
+function perm(w::Wires,π::Array)
+    N=length(w.signs)
+    linelocation=[(i-(1/2))/N for i=1:N] 
+    lineContexts=Any[]
+    for i=1:N
+        y=(i-.5)/N
+        y1=linelocation[π[i]]
+        if w.signs[i]==-1
+            thisline=[Compose.curve((0,y),(.7,y),(.3,y1),(1,y1)),
+                      Compose.line([(.1,y),(.05,y-.05)]),
+                      Compose.line([(.1,y),(.05,y+.05)])]
+        elseif w.signs[i]==1
+            thisline=[Compose.curve((0,y),(.7,y),(.3,y1),(1,y1)),
+                      Compose.line([(.1,y),(.15,y-.05)]),
+                      Compose.line([(.1,y),(.15,y+.05)])]
+        elseif w.signs[i]==0
+            thisline=[Compose.line([(.45,y),(.55,y1)])]
+        else
+            error("invalid line")
+        end
+        append!(lineContexts,thisline)
+    end
+    Compose.compose(Compose.context(),Compose.stroke(Compose.color("black")),Compose.linewidth(1),lineContexts...)
+end
+
+#        swap_underline=Compose.compose(Compose.context(),Compose.curve((0,.75),(.7,.75),(.3,.25),(1,.25)),Compose.stroke(Compose.color("black")),Compose.linewidth(1))
 
 
 function cup(w::Wires) #coev
@@ -163,27 +192,17 @@ cup(n::Int)=cup(Wires(n))
 
 @instance! ClosedCompactCategory Wires Boxx begin
     dual(w::Wires)=Wires(-w.signs)
-    # ev for Wires(2) is cap ⊗ cap ∘ (id(Wires(1)) ⊗ swap ⊗id(Wires(1)))
-    # etc, to fix, use crossed nested
-    #the below only work for Wires(1) now
-    ev(w::Wires)=cap(w) 
+    ev(w::Wires)  =cap(w) 
     coev(w::Wires)=cup(w)
-    sigma(n::Wires,m::Wires)=swap
+    sigma(n::Wires,m::Wires)=swap #FIX
 end
-#now f.' just works, draws the swirl
 
-#must be run from toplevel
-# import Blink
-# BlinkDisplay.init()
-# media(Boxx,Media.Graphical)
-# mbox(1,1,"f")
-# pin()
 
 bi= quote
-    import Blink; BlinkDisplay.init();media(Boxx,Media.Graphical);
-    id(Wires([1  0 -1]))
-    f.'
+    import Blink; BlinkDisplay.init();media(Boxx,Media.Graphical);media(Compose.Context,Media.Graphical);
+    f=mbox(2,2,"f")
     pin()
+    f.'
 end
 
 
