@@ -4,6 +4,9 @@ module MonoidalCategories
 export MonoidalCategory,dom,cod,id,munit,⊗,∘,comperr
 export ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma,σ
 export DaggerClosedCompactCategory,dagger
+export associator,associatorinv,leftunitor,rightunitor,leftunitorinv,rightunitorinv
+export lrweaktranspose
+
 
 using Typeclass
 import Base:show,ctranspose,transpose
@@ -12,7 +15,7 @@ import Base:show,ctranspose,transpose
     dom(f::Mor)::Ob #fix in Typeclass.jl so f.dom::Ob now if we do that ret type is ignored
     cod(f::Mor)::Ob
     id(A::Ob)::Mor
-    compose(f::Mor,g::Mor)::Mor #f*g
+    compose(f::Mor,g::Mor)::Mor 
     otimes(f::Mor,g::Mor)::Mor
     otimes(A::Ob,B::Ob)::Ob
     munit(::Ob)::Ob
@@ -22,14 +25,36 @@ import Base:show,ctranspose,transpose
 #    |(f::Mor,g::Mor)=compose(g,f)
     ⊗(f::Mor,g::Mor)=otimes(f,g)
     ⊗(A::Ob,B::Ob)=otimes(A,B) 
-    #⊗(As:Array{Ob})=foldl(⊗,As) # not quite but something like this is needed
+    ⊗(As::Array{Ob})=foldl(⊗,As) 
+    ⊗(As::Array{Mor})=foldl(⊗,As) 
     ^(f::Mor,ex::Array{Any,2})= ex[1]==⊗? foldl(⊗,[f for i=1:ex[2]]): ex[1]==∘? foldl(∘,[f for i=1:ex[2]]):error("invalid exponent")
+    # default strict, but stubs in case needed.  WeakMC also should be defined
+    associator(A::Ob,B::Ob,C::Ob)=id(A⊗B⊗C) 
+    associatorinv(A::Ob,B::Ob,C::Ob)=id(A⊗B⊗C) 
+    leftunitor(I::Ob,A::Ob)=id(A) #I⊗A→A
+    rightunitor(A::Ob,I::Ob)=id(A)#A⊗I→A
+    leftunitorinv(A::Ob)=id(A)    #A→I⊗A
+    rightunitorinv(A::Ob)=id(A)   #A→A⊗I
 end
+
 
 #Assuming Ob Mor is a MonoidalCategory already
 @class ClosedCompactCategory Ob Mor begin
     dual(A::Ob)::Ob
-    transp(f::Mor)= (ev(cod(f))⊗id(dual(dom(f)))) ∘ (id(dual(cod(f)))⊗f⊗id(dual(dom(f)))) ∘(id(dual(cod(f))) ⊗ coev(dom(f))) #this only works in a strict CCC, because the grouping of the three spaces has to change.  We could check if strict and add associators to the expression.
+    # the following transpose requires both strict associativivity, because 
+    # the grouping of the three spaces in the middle changes, and strict right
+    # and left unitors, because the domain is I \ot A and codomain is A \ot I
+    # for example in the graphical representation, shifts/ half swaps are 
+    # required for f.' ∘ g.' to line up.
+    transp(f::Mor)= (ev(cod(f))⊗id(dual(dom(f)))) ∘ (id(dual(cod(f)))⊗f⊗id(dual(dom(f)))) ∘(id(dual(cod(f))) ⊗ coev(dom(f))) 
+    # Thus we provide weak versions as utilities, to make nearly-strict CCCs 
+    # easier to define.
+    # -Left and right unitor weak version
+    shiftdown(A::Ob)=leftunitorinv(A) ∘ rightunitor(A,munit(A)) #A⊗I→A→I⊗A 
+    shiftup(A::Ob)  =rightunitorinv(A) ∘ leftunitor(munit(A),A) #I⊗A→A→A⊗I 
+    lrweaktranspose(f::Mor)= shiftup(dual(dom(f))) ∘ transp(f) ∘ shiftup(dual(cod(f)))
+    # -Associator weak version
+    assocweaktranspose(f::Mor)= (ev(cod(f))⊗id(dual(dom(f)))) ∘ (id(dual(cod(f)))⊗f⊗id(dual(dom(f)))) ∘(id(dual(cod(f))) ⊗ coev(dom(f))) 
     ev(A::Ob)::Mor
     coev(A::Ob)::Mor
     Hom(A::Ob,B::Ob)=dual(A)⊗B

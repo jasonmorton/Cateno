@@ -1,6 +1,6 @@
-module WiresBoxes
+module WeakWiresBoxes
 using Typeclass,MonoidalCategories
-import MonoidalCategories:MonoidalCategory,dom,cod,id,munit,⊗,∘ #this unifies id etc
+import MonoidalCategories:MonoidalCategory,dom,cod,id,munit,⊗,∘ 
 import Compose
 using Compose:Context,context,rectangle,circle,fill #doesn't put in scope
 export dom,cod,id,munit,⊗,∘
@@ -13,48 +13,43 @@ import MonoidalCategories:lrweaktranspose
 
 import Base.writemime
 
-#Wires is a container simply so that MonoidalCategory functions like id
-#can be dispatched properly and different categories with Integer objects can be
-#distinguished. another approach would be to make this a parametric type like
-#MyInteger{MorphismType} or MyInteger{CategoryType}
-#typealias Wires Int# wouldn't work because id would overwrite other Int defs
-#from other categories.
-
 ############# Basic defintions and instance declaration ################
-type Wires  #An object is a collection of n wires
-    n::Integer
+type Wires  
+    signs::Array{Int,1} # 1=primal 0=I -1=dual
 end
-==(w::Wires,z::Wires)=w.n==z.n
+==(w::Wires,z::Wires)=w.signs==z.signs
+Wires(signs::Array{Int,2})=Wires(vec(signs))
+Wires(n::Int)=Wires(sign(n)*ones(Int,abs(n)))
 
-type Boxx    #A morphism is a box with input and output wires (with subboxes)
+type Boxx    
     con::Context   #The Compose.jl Context that holds the drawing
     inwires::Wires
     outwires::Wires
     length::Int    #number of primitive horizontal boxes in the Boxx
 end
+Boxx(c,n::Array{Int},m::Array{Int},ell)=Boxx(c,Wires(n),Wires(m),ell) 
 Boxx(c,n::Int,m::Int,ell)=Boxx(c,Wires(n),Wires(m),ell) 
 writemime(io::IO, m::MIME"image/svg+xml", b::Boxx)=writemime(io::IO, m, b.con)
 
-@instance MonoidalCategory Wires Boxx begin
+@instance MonoidalCategory Wires Boxx begin #UnitorWeakMC
     dom(c::Boxx)=c.inwires
     cod(c::Boxx)=c.outwires
-    id(n::Wires)=Boxx(lines(n.n),n,n,1)
+    id(w::Wires)=Boxx(lines(w.signs),w,w,1) #lines skips Is in array
     compose(f::Boxx,g::Boxx)=hstackCons(f,g)
     otimes(f::Boxx,g::Boxx)=vstackCons(f,g)
-    otimes(n::Wires,m::Wires)=Wires(n.n+m.n)
-    munit(::Wires)=Wires(0)  #this should be an object! if used Boxx, why is Typeclass not throwing an error?
+    otimes(w::Wires,u::Wires)=Wires(vcat(w.signs,u.signs))
+    munit(::Wires)=Wires([0])  
 end
 
 ##### Associative vertical and horizontal stacking #########
 #the strategy to get associative ⊗ vertically is to track the total, maximum number of wires.  In the final image, each wire gets the same amount of space above and below.  For horizontal ∘, we use length.  We may also need virtual wires or spacer wires to pad any vertical slices that fall short.
 
 function vstackCons(top,bot)
-    topmax=max(dom(top).n,cod(top).n) 
-    topmax=topmax==0?1:topmax # this is not associative since we forget internal number of wires
-    botmax=max(dom(bot).n,cod(bot).n) 
-    botmax=botmax==0?1:botmax # this is not associative since we forget internal number of wires
-    inwires=dom(top)⊗dom(bot) #adds them
-    outwires=cod(top)⊗cod(bot) #adds them
+    #these should always be equal now
+    topmax=max( length( dom(top).signs)   ,  length( cod(top).signs) ) 
+    botmax=max(length(dom(bot).signs),length(cod(bot).signs))     #these should always be equal now
+    inwires=dom(top)⊗dom(bot) #concats
+    outwires=cod(top)⊗cod(bot) #concats
     M=topmax+botmax
     topshare=topmax/M
     botshare=botmax/M
@@ -76,7 +71,32 @@ end
 
 ############## Graphics primitives #########################
 # line spacing designed to work with associative stacking
-lines(n)=Compose.compose(Compose.context(),Compose.stroke(Compose.color("black")),Compose.linewidth(1),[Compose.line([(0,(i-(1/2))/(n)),(1,(i-(1/2))/(n))]) for i=1:n]...)
+#lines(n::Integer)=Compose.compose(Compose.context(),Compose.stroke(Compose.color("black")),Compose.linewidth(1),[Compose.line([(0,(i-(1/2))/(n)),(1,(i-(1/2))/(n))]) for i=1:n]...)
+
+lines(n::Int)=lines([1 for i=1:n])
+
+function lines(signs::Array{Int})
+    N=length(signs)
+    lineContexts=Any[]
+    for i=1:N
+        y=(i-.5)/N
+        if signs[i]==-1
+            thisline=[Compose.line([(0,y),(1,y)]),
+                      Compose.line([(.5,y),(.45,y-.05)]),
+                      Compose.line([(.5,y),(.45,y+.05)])]
+        elseif signs[i]==1
+            thisline=[Compose.line([(0,y),(1,y)]),
+                      Compose.line([(.5,y),(.55,y-.05)]),
+                      Compose.line([(.5,y),(.55,y+.05)])]
+        elseif signs[i]==0
+            thisline=[Compose.line([(.45,y),(.55,y)])]
+        else
+            error("invalid line")
+        end
+        append!(lineContexts,thisline)
+    end
+    Compose.compose(Compose.context(),Compose.stroke(Compose.color("black")),Compose.linewidth(1),lineContexts...)
+end
 
 threeptpoly(a,b,c,tx)=Compose.compose(Compose.context(),Compose.polygon([a,b,c]),Compose.fill(Compose.RGBA{Float64}(0,0,0,0)),Compose.stroke(Compose.color("black")),Compose.text(.5,.5,tx))
 
@@ -96,14 +116,13 @@ end
 
 #primitive graphical elements
 bra(n,txt)=Boxx(hstackcontexts(threeptpoly((0,.5),(1,.95),(1,.05),txt),lines(n)),
-               n,0,1)
-ket(n,txt)=Boxx(hstackcontexts(lines(n),threeptpoly((1,.5),(0,.95),(0,.05),txt)),
-               0,n,1)
+               ones(Int,n),zeros(Int,n),1)
+ket(n,txt)=Boxx(hstackcontexts(lines(n),threeptpoly((1,.5),(0,.95),(0,.05),txt)),              zeros(Int,n),ones(Int,n),1)
 ket(n)=ket(n,"")
 bra(n)=bra(n,"")
 
 boxwithtext(txt)=Compose.compose(Compose.context(),Compose.rectangle(0,.05,1,.9),Compose.fill(Compose.RGBA{Float64}(0,0,0,0)),Compose.stroke(Compose.color("black")),Compose.text(.5,.55,txt)) #.5 -1textwidth, .5+1textheight is what we want
-mbox(n,m,txt) = Boxx(hstackcontexts(lines(m),boxwithtext(txt),lines(n)),n,m,1)
+mbox(n,m,txt) = Boxx(hstackcontexts(lines(m),boxwithtext(txt),lines(n)),Wires(n),Wires(m),1)
 Boxx(n,m,txt)=mbox(n,m,txt)
 mbox(n,m)=mbox(n,m,"")
 Boxx(n,m)=mbox(n,m)
@@ -113,53 +132,42 @@ swap_underline=Compose.compose(Compose.context(),Compose.curve((0,.75),(.7,.75),
 swap_overline(col,wid)=Compose.compose(Compose.context(),Compose.curve((0,.25),(.7,.25),(.3,.75),(1,.75)),Compose.stroke(Compose.color(col)),Compose.linewidth(wid))
 swapcon=Compose.compose(swap_underline,Compose.compose(swap_overline("white",2),swap_overline("black",1)))
 
-swap=Boxx(swapcon,2,2,1)
-
-_cup=Compose.compose(Compose.context(),Compose.curve((0,.75),(.75,.75),(.75,.25),(0,.25)),Compose.stroke(Compose.color("black")),Compose.linewidth(1))
-_cap=Compose.compose(Compose.context(),Compose.curve((1,.75),(.25,.75),(.25,.25),(1,.25)),Compose.stroke(Compose.color("black")),Compose.linewidth(1))
-cup1=Boxx(_cup,0,2,1)
-cap1=Boxx(_cap,2,0,1)
+swap=Boxx(swapcon,[1 1],[1 1],1)
 
 
-#repetive, refactor
-function cup(n)
+
+function cup(w::Wires) #coev
+    n=length(w.signs)
     linelocation=[(i-(1/2))/(2n) for i=1:2n] 
     pic=Compose.compose(Compose.context(),
                     [Compose.curve((0,linelocation[i]),(.75,linelocation[i]),(.75,linelocation[i+n]),(0,linelocation[i+n])) for i=1:n]...,
                     Compose.stroke(Compose.color("black")),Compose.linewidth(1))
-    Boxx(pic,0,2n,1)
+    Boxx(pic,zeros(Int,2n),vcat(w.signs,-w.signs),1)
 end
-function cap(n)
+function cap(w::Wires) #ev
+    n=length(w.signs)
     linelocation=[(i-(1/2))/(2n) for i=1:2n] 
     pic=Compose.compose(Compose.context(),
                     [Compose.curve((1,linelocation[i]),(.25,linelocation[i]),(.25,linelocation[i+n]),(1,linelocation[i+n])) for i=1:n]...,
                     Compose.stroke(Compose.color("black")),Compose.linewidth(1))
-    Boxx(pic,2n,0,1)
+    Boxx(pic,vcat(-w.signs,w.signs),zeros(Int,2n),1)
 end
-
+cap(n::Int)=cap(Wires(n))
+cup(n::Int)=cup(Wires(n))
 
 #left and right unitors
 #f.' ∘(Boxx(WiresBoxes.swap_overline("black",1),1,1,1)⊗id(munit(Wires(1))))
 
-ell1=Boxx(WiresBoxes.swap_overline("black",1),2,2,1)
+# ell1=Boxx(WiresBoxes.swap_overline("black",1),2,2,1) 
 
 
-
-draw(f::Boxx,filename)=tdraw(f.con,filename)
-draw(f::Boxx)=draw(f,"test.svg")
-function tdraw(cont,filename)
-    img = Compose.SVG(filename, 4Compose.inch, 4(sqrt(3)/2)Compose.inch)
-    Compose.draw(img,cont)
-end
-
-#without arrows first
 @instance! ClosedCompactCategory Wires Boxx begin
-    dual(n::Wires)=n
+    dual(w::Wires)=Wires(-w.signs)
     # ev for Wires(2) is cap ⊗ cap ∘ (id(Wires(1)) ⊗ swap ⊗id(Wires(1)))
     # etc, to fix, use crossed nested
     #the below only work for Wires(1) now
-    ev(n::Wires)=cap(n.n) 
-    coev(n::Wires)=cup(n.n)
+    ev(w::Wires)=cap(w) 
+    coev(w::Wires)=cup(w)
     sigma(n::Wires,m::Wires)=swap
 end
 #now f.' just works, draws the swirl
@@ -172,13 +180,13 @@ end
 # pin()
 
 bi= quote
-    import Blink
-    BlinkDisplay.init();media(Boxx,Media.Graphical);
-    mbox(1,1,"f")
+    import Blink; BlinkDisplay.init();media(Boxx,Media.Graphical);
+    id(Wires([1  0 -1]))
+    f.'
     pin()
 end
 
 
 end
 
-##then drawings appear and it is beautiful.
+
