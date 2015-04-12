@@ -1,18 +1,26 @@
-using Typeclass,Representations,FiniteTensorSignatures,WiresBoxes,MonoidalCategories
+using Typeclass,Representations,FiniteTensorSignatures,WeakWiresBoxes,MonoidalCategories
 
 #automatically compute a diagram interpretation from a finite tensor signature
 #second argument is the kind of category, eg. MC, CCC, DCCC.
 #consider placing into show in FTS for MorphismWords
+
+symtosign(s::Symbol)=endswith(string(s),"_")? -1 : s==:I ? 0 : 1 
+
+function OWord_to_pmz(A::FiniteTensorSignatures.OWord)
+    map(symtosign,FiniteTensorSignatures.flattenotree(A.word))
+end
+
 function diagramsfor(T::FiniteTensorSignature,X::Class)
-    # eval( Expr(:using,:WiresBoxes))
-    # eval( Expr(:using,:Representations))
     mordict=Dict()
     obdict=Dict()
     for mv in T.morvars
-        # mv_domain = Wires(length(T.dom[mv]))
-        # mv_codomain = Wires(length(T.cod[mv]))
-        mv_domain = length(T.dom[mv])
-        mv_codomain = length(T.cod[mv])
+        if X==MonoidalCategory
+            mv_domain = Wires(length(T.dom[mv]))
+            mv_codomain = Wires(length(T.cod[mv]))
+        elseif X==CompactClosedCategory #shld use a type poset
+            mv_domain = Wires(OWord_to_pmz(T.dom[mv]))
+            mv_codomain = Wires(OWord_to_pmz(T.cod[mv]))
+        end
         mv_label = mv
 #        println(mv,mv_domain, mv_codomain, string(mv_label))
         mordict[mv] = mbox(mv_domain, mv_codomain, string(mv_label))

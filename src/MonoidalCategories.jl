@@ -4,7 +4,7 @@ module MonoidalCategories
 export MonoidalCategory,dom,cod,id,munit,⊗,∘,comperr
 export ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma,σ
 export DaggerClosedCompactCategory,dagger
-export associator,associatorinv,leftunitor,rightunitor,leftunitorinv,rightunitorinv
+#export associator,associatorinv,leftunitor,rightunitor,leftunitorinv,rightunitorinv
 #export lrweaktranspose
 
 
@@ -29,12 +29,12 @@ import Base:show,ctranspose,transpose
     ⊗(As::Array{Mor})=foldl(⊗,As) 
     ^(f::Mor,ex::Array{Any,2})= ex[1]==⊗? foldl(⊗,[f for i=1:ex[2]]): ex[1]==∘? foldl(∘,[f for i=1:ex[2]]):error("invalid exponent")
     # default strict, but stubs in case needed.  WeakMC also should be defined
-    associator(A::Ob,B::Ob,C::Ob)=id(A⊗B⊗C) #foldl->foldr
-    associatorinv(A::Ob,B::Ob,C::Ob)=id(A⊗B⊗C) 
-    leftunitor(I::Ob,A::Ob)=id(A) #I⊗A→A
-    rightunitor(A::Ob,I::Ob)=id(A)#A⊗I→A
-    leftunitorinv(A::Ob)=id(A)    #A→I⊗A
-    rightunitorinv(A::Ob)=id(A)   #A→A⊗I
+    # associator(A::Ob,B::Ob,C::Ob)=id(A⊗B⊗C) #foldl->foldr
+    # associatorinv(A::Ob,B::Ob,C::Ob)=id(A⊗B⊗C) 
+    # leftunitor(I::Ob,A::Ob)=id(A) #I⊗A→A
+    # rightunitor(A::Ob,I::Ob)=id(A)#A⊗I→A
+    # leftunitorinv(A::Ob)=id(A)    #A→I⊗A
+    # rightunitorinv(A::Ob)=id(A)   #A→A⊗I
 end
 
 
