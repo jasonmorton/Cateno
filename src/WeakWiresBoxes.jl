@@ -161,8 +161,8 @@ function primitive(w::Wires,kind::Symbol,π::Array)
     end
     contents=Any[]
     for i=1:n
-        Icolor=Compose.color(Compose.RGBA{Float64}(0,0,0,0))#Compose.color("light grey")
-        color=w.signs[i]==0?Icolor:Compose.color("black")
+        Icolor=nothing#Compose.color("light grey") #for debugging
+        color=w.signs[i]==0?Icolor : Compose.color("black")
         y=linelocation[i]
         if kind==:perm
             y1=linelocation[π[i]]
