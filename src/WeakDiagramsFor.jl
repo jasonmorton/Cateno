@@ -17,7 +17,7 @@ function diagramsfor(T::FiniteTensorSignature,X::Class)
         if X==MonoidalCategory
             mv_domain = Wires(length(T.dom[mv]))
             mv_codomain = Wires(length(T.cod[mv]))
-        elseif X==CompactClosedCategory #shld use a type poset
+        elseif X==ClosedCompactCategory #shld use a type poset
             mv_domain = Wires(OWord_to_pmz(T.dom[mv]))
             mv_codomain = Wires(OWord_to_pmz(T.cod[mv]))
         end
@@ -27,10 +27,10 @@ function diagramsfor(T::FiniteTensorSignature,X::Class)
     end
     for ov in T.obvars
  #       println("assigning Wires(1) to ",ov)
-        obdict[ov]=Wires(1)
+        obdict[ov]=Wires(symtosign(ov))
         #arguably the duals should go in the FTS constructor
 
-        obdict[FiniteTensorSignatures.toggledual(ov)]=Wires(1)
+        obdict[FiniteTensorSignatures.toggledual(ov)]=Wires(symtosign(FiniteTensorSignatures.toggledual(ov)))
     end
 #    println(obdict)
 #    println(mordict)

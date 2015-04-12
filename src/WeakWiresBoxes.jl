@@ -13,6 +13,7 @@ import MonoidalCategories:associator,associatorinv,leftunitor,rightunitor,leftun
 
 import Base:writemime,length
 
+################################################################################
 ############# Basic defintions and instance declaration ################
 type Wires  
     signs::Array{Int,1} # 1=primal 0=I -1=dual

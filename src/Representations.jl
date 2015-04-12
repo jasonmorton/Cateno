@@ -45,9 +45,12 @@ type Representation#{ObjectType,MorphismType}
             #check that F(f) is defined
             @assert haskey(md,f) error("missing value of ",f)
             #check that dom(F(f))==F(dom(f))
-            @assert F(T.dom[f])==dom(F(f))  ("dom(F($f)):",F(T.dom[f])," unequal to F(dom($f)): ",dom(F(f)))
+            @assert F(T.dom[f])==dom(F(f))  ("dom(F($f)):",dom(F(f))," unequal to F(dom($f)): ",F(T.dom[f]))
             #check that cod(F(f))==F(cod(f)) 
-            @assert F(T.cod[f])==cod(F(f)) 
+            @assert F(T.cod[f])==cod(F(f))  ("cod(F($f)):",cod(F(f))," unequal to F(dom($f)): ",F(T.cod[f]))
+            #issue: these need to deal with up to isomorphism for padding in WeakBoxes
+
+
         end
         # check that all object variables have been assigned a value 
         # in the representation
