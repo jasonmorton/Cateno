@@ -37,7 +37,7 @@ writemime(io::IO, m::MIME"image/svg+xml", b::Boxx)=writemime(io::IO, m, b.con)
 @instance MonoidalCategory Wires Boxx begin #UnitorWeakMC
     dom(c::Boxx)=c.inwires
     cod(c::Boxx)=c.outwires
-    id(w::Wires)=Boxx(lines(w.signs),w,w,1) #lines skips Is in array
+    id(w::Wires)=primitive(w,:line) #Boxx(lines(w.signs),w,w,1) #lines skips Is in array
     compose(f::Boxx,g::Boxx)=hstackCons(f,g)
     otimes(f::Boxx,g::Boxx)=vstackCons(f,g)
     otimes(w::Wires,u::Wires)=Wires(vcat(w.signs,u.signs))
@@ -134,7 +134,7 @@ function mbox(w::Wires,v::Wires,txt)
     new_v=zeros(Int,nwires)
     new_w[1:length(w.signs)]=w.signs
     new_v[1:length(v.signs)]=v.signs
-    Boxx(hstackcontexts(lines(new_v),boxwithtext(txt),lines(new_w)),w,v,1)
+    Boxx(hstackcontexts(lines(new_v),boxwithtext(txt),lines(new_w)),new_w,new_v,1)
 end
 mbox(w::Wires,v::Wires)=mbox(w,v,"")
 mbox(n::Int,m::Int,txt)=mbox(Wires(n),Wires(m),txt)
@@ -149,58 +149,87 @@ swapcon=Compose.compose(swap_underline,Compose.compose(swap_overline("white",2),
 
 swap=Boxx(swapcon,[1 1],[1 1],1)
 
+#swaps, unitors, perms, lines, etc all special cases of
+primitive(w::Wires,kind::Symbol)=primitive(w::Wires,kind::Symbol,[i for i in 1:length(w.signs)])
+function primitive(w::Wires,kind::Symbol,π::Array)
+    n=length(w.signs)
+    # possible y values 
+    if kind in (:perm,:line)
+        linelocation=[(i-(1/2))/n for i=1:n] 
+    elseif kind in (:cup,:cap)
+        linelocation=[(i-(1/2))/(2n) for i=1:2n] 
+    end
+    contents=Any[]
+    for i=1:n
+        Icolor=Compose.color(Compose.RGBA{Float64}(0,0,0,0))#Compose.color("light grey")
+        color=w.signs[i]==0?Icolor:Compose.color("black")
+        y=linelocation[i]
+        if kind==:perm
+            y1=linelocation[π[i]]
+            thisline=Compose.compose(Compose.context(),
+                                     Compose.curve((0,y1),(.7,y1),(.3,y),(1,y)),
+                                     Compose.stroke(color),
+                                     Compose.linewidth(1))
+        elseif kind==:cup
+            y1=linelocation[i+n]
+            thisline=Compose.compose(Compose.context(),
+                                     Compose.curve((0,y),(.75,y),(.75,y1),(0,y1)),
+                                     Compose.stroke(color),
+                                     Compose.linewidth(1))
 
-#swaps, unitors, lines, etc all special cases of
-function perm(w::Wires,π::Array)
-    N=length(w.signs)
-    linelocation=[(i-(1/2))/N for i=1:N] 
-    lineContexts=Any[]
-    for i=1:N
-        y=(i-.5)/N
-        y1=linelocation[π[i]]
-        if w.signs[i]==-1
-            thisline=[Compose.curve((0,y1),(.7,y1),(.3,y),(1,y)),
-                      Compose.line([(.1,y1),(.05,y1-.05)]),
-                      Compose.line([(.1,y1),(.05,y1+.05)])]
-        elseif w.signs[i]==1
-            thisline=[Compose.curve((0,y1),(.7,y1),(.3,y),(1,y)),
-                      Compose.line([(.1,y1),(.15,y1-.05)]),
-                      Compose.line([(.1,y1),(.15,y1+.05)])]
-        elseif w.signs[i]==0
-            thisline=[]
-#            thisline=[Compose.line([(.45,y1),(.55,y)])]
-        else
-            error("invalid line")
+        elseif kind==:cap
+            y1=linelocation[i+n]
+            linelocation=[(i-(1/2))/(2n) for i=1:2n] 
+            thisline=Compose.compose(Compose.context(),
+                                     Compose.curve((1,y),(.25,y),(.25,y1),(1,y1)),
+                                     Compose.stroke(color),
+                                     Compose.linewidth(1))
+        elseif kind==:line
+            y1=linelocation[i]
+            if w.signs[i]==-1
+                thisline=Compose.compose(Compose.context(),
+                                         Compose.line([(0,y),(1,y)]),
+                                         Compose.line([(.5,y),(.45,y-.05)]),
+                                         Compose.line([(.5,y),(.45,y+.05)]),
+                                         Compose.stroke(color),
+                                         Compose.linewidth(1))
+            elseif w.signs[i]==1
+                thisline=Compose.compose(Compose.context(),
+                                         Compose.line([(0,y),(1,y)]),
+                                         Compose.line([(.5,y),(.55,y-.05)]),
+                                         Compose.line([(.5,y),(.55,y+.05)]),
+                                         Compose.stroke(color),
+                                         Compose.linewidth(1))                
+            elseif w.signs[i]==0
+                thisline=Compose.compose(Compose.context(),
+                                         Compose.line([(0,y),(1,y)]),
+                                         Compose.stroke(color),
+                                         Compose.linewidth(1))
+
+            end
         end
-        append!(lineContexts,thisline)
+        push!(contents,thisline)
+
     end
-    piwsigns=zeros(Int,N)
-    for i in 1:N
-        piwsigns[π[i]]=w.signs[i]
+    
+    picture = Compose.compose(contents...)
+    if kind==:perm
+        piwsigns=zeros(Int,n)
+        for i in 1:n
+            piwsigns[π[i]]=w.signs[i]
+        end
+        piw=Wires(piwsigns)
+        return Boxx(picture,w,piw,1)
+    elseif kind==:cap
+        return Boxx(picture,vcat(-w.signs,w.signs),zeros(Int,2n),1)
+    elseif kind==:cup
+        return Boxx(picture,zeros(Int,2n),vcat(w.signs,-w.signs),1)
+    elseif kind==:line
+        return Boxx(picture,w,w,1)
     end
-    piw=Wires(piwsigns)
-    Boxx(Compose.compose(Compose.context(),Compose.stroke(Compose.color("black")),Compose.linewidth(1),lineContexts...),w,piw,1)
 end
 
 
-function cup(w::Wires) #coev
-    n=length(w.signs)
-    linelocation=[(i-(1/2))/(2n) for i=1:2n] 
-    pic=Compose.compose(Compose.context(),
-                    [Compose.curve((0,linelocation[i]),(.75,linelocation[i]),(.75,linelocation[i+n]),(0,linelocation[i+n])) for i=1:n]...,
-                    Compose.stroke(Compose.color("black")),Compose.linewidth(1))
-    Boxx(pic,zeros(Int,2n),vcat(w.signs,-w.signs),1)
-end
-function cap(w::Wires) #ev
-    n=length(w.signs)
-    linelocation=[(i-(1/2))/(2n) for i=1:2n] 
-    pic=Compose.compose(Compose.context(),
-                    [Compose.curve((1,linelocation[i]),(.25,linelocation[i]),(.25,linelocation[i+n]),(1,linelocation[i+n])) for i=1:n]...,
-                    Compose.stroke(Compose.color("black")),Compose.linewidth(1))
-    Boxx(pic,vcat(-w.signs,w.signs),zeros(Int,2n),1)
-end
-cap(n::Int)=cap(Wires(n))
-cup(n::Int)=cup(Wires(n))
 
 #left and right unitors
 #f.' ∘(Boxx(WiresBoxes.swap_overline("black",1),1,1,1)⊗id(munit(Wires(1))))
@@ -209,24 +238,25 @@ function rshiftupfortransp(f::Boxx)
     nfdom=length(dom(f).signs)
     nfcod=length(cod(f).signs)
     π=vcat( (nfcod+1):(nfcod+nfcod), 1:nfcod, (nfdom+nfcod+1):(nfdom+nfcod+nfdom) ) #middle,beginning,ending
-    perm(Wires(vcat(zeros(Int,nfcod),dual(cod(f)).signs,zeros(Int,nfdom)) )  ,π)
+    primitive(Wires(vcat(zeros(Int,nfcod),dual(cod(f)).signs,zeros(Int,nfdom)) )  ,:perm,π)
 end
 function lshiftupfortransp(f::Boxx)
     nfdom=length(dom(f).signs)
     nfcod=length(cod(f).signs)
     π=vcat( 1:nfcod, (nfdom+nfcod+1):(nfdom+nfcod+nfdom),(nfcod+1):(nfcod+nfcod) ) #beginning, ending, middle
-    perm(Wires(vcat(zeros(Int,nfcod),zeros(Int,nfdom),dual(cod(f)).signs) )  ,π)
+    w = Wires(vcat(zeros(Int,nfcod),zeros(Int,nfdom),dual(dom(f)).signs) )
+    primitive(w,:perm,π)
 end
 
 @instance! ClosedCompactCategory Wires Boxx begin
     dual(w::Wires)=Wires(-w.signs)
-    ev(w::Wires)  =cap(w) 
-    coev(w::Wires)=cup(w)
+    ev(w::Wires)  = primitive(w,:cap)
+    coev(w::Wires)= primitive(w,:cup)
     transpose(f::Boxx)= lshiftupfortransp(f) ∘ transp(f) ∘ rshiftupfortransp(f)
     function sigma(w::Wires,v::Wires)
         n=length(w.signs)
         m=length(v.signs)
-        perm(w⊗v,vcat( (n+1):(n+m),1:n ))
+        primitive(w⊗v,:perm, vcat( (n+1):(n+m),1:n ))
     end
 end
 
@@ -238,6 +268,7 @@ bi= quote
     f.'
 end
 
+# > f.' ∘ id(Wires([0 0 0 -1 -1 -1 0 0 0])) ∘ (id(Wires([0 0 0])) ⊗ mbox(0,-3) ⊗id(Wires([0 0 0])))
 
 end
 
