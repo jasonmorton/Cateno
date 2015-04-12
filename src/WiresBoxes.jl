@@ -8,8 +8,8 @@ import MonoidalCategories:ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
 export dual,transp,ev,coev,tr,Hom,sigma
 export tdraw,draw,bra,ket,mbox,swap,cup,cap,lines,Boxx,Wires
 
-import MonoidalCategories:associator,associatorinv,leftunitor,rightunitor,leftunitorinv,rightunitorinv
-import MonoidalCategories:lrweaktranspose
+#import MonoidalCategories:associator,associatorinv,leftunitor,rightunitor,leftunitorinv,rightunitorinv
+#import MonoidalCategories:lrweaktranspose
 
 import Base.writemime
 
@@ -42,7 +42,7 @@ writemime(io::IO, m::MIME"image/svg+xml", b::Boxx)=writemime(io::IO, m, b.con)
     compose(f::Boxx,g::Boxx)=hstackCons(f,g)
     otimes(f::Boxx,g::Boxx)=vstackCons(f,g)
     otimes(n::Wires,m::Wires)=Wires(n.n+m.n)
-    munit(::Wires)=Wires(0)  #this should be an object! if used Boxx, why is Typeclass not throwing an error?
+    munit(::Wires)=Wires(0)  
 end
 
 ##### Associative vertical and horizontal stacking #########
