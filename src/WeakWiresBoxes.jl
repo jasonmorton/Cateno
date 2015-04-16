@@ -1,6 +1,6 @@
 module WeakWiresBoxes
 using Typeclass,MonoidalCategories
-import MonoidalCategories:MonoidalCategory,dom,cod,id,munit,⊗,∘ 
+import MonoidalCategories:MonoidalCategory,dom,cod,id,munit,⊗,∘,comperr
 import Compose
 using Compose:Context,context,rectangle,circle,fill #doesn't put in scope
 export dom,cod,id,munit,⊗,∘
@@ -8,11 +8,11 @@ import MonoidalCategories:ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
 export dual,transp,ev,coev,tr,Hom,sigma
 export bra,ket,mbox,swap,cup,cap,lines,Boxx,Wires,perm,lshiftupfortransp,rshiftupfortransp
 
-import MonoidalCategories:associator,associatorinv,leftunitor,rightunitor,leftunitorinv,rightunitorinv
+#import MonoidalCategories:associator,associatorinv,leftunitor,rightunitor,leftunitorinv,rightunitorinv
 #import MonoidalCategories:lrweaktranspose
 
 import Base:writemime,length
-
+include("MatchWires.jl")
 ################################################################################
 ############# Basic defintions and instance declaration ################
 type Wires  
@@ -39,7 +39,8 @@ writemime(io::IO, m::MIME"image/svg+xml", b::Boxx)=writemime(io::IO, m, b.con)
     dom(c::Boxx)=c.inwires
     cod(c::Boxx)=c.outwires
     id(w::Wires)=primitive(w,:line) #Boxx(lines(w.signs),w,w,1) #lines skips Is in array
-    compose(f::Boxx,g::Boxx)=hstackCons(f,g)
+    compose(f::Boxx,g::Boxx)=dom(f)==cod(g)?hstackCons(f,g): f ∘ primitive(cod(g),:perm,greedymatchwires(dom(f).signs,cod(g).signs))∘g
+    ∘(f::Boxx,g::Boxx)=compose(f,g)
     otimes(f::Boxx,g::Boxx)=vstackCons(f,g)
     otimes(w::Wires,u::Wires)=Wires(vcat(w.signs,u.signs))
     munit(::Wires)=Wires([0])  
@@ -138,6 +139,7 @@ function mbox(w::Wires,v::Wires,txt)
     Boxx(hstackcontexts(lines(new_v),boxwithtext(txt),lines(new_w)),new_w,new_v,1)
 end
 mbox(w::Wires,v::Wires)=mbox(w,v,"")
+mbox(w::Array,v::Array)=mbox(Wires(w),Wires(v),"")
 mbox(n::Int,m::Int,txt)=mbox(Wires(n),Wires(m),txt)
 mbox(n::Int,m::Int)=mbox(n,m,"")
 Boxx(n::Int,m::Int,txt)=mbox(n,m,txt)
