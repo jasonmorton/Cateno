@@ -39,7 +39,40 @@ writemime(io::IO, m::MIME"image/svg+xml", b::Boxx)=writemime(io::IO, m, b.con)
     dom(c::Boxx)=c.inwires
     cod(c::Boxx)=c.outwires
     id(w::Wires)=primitive(w,:line) #Boxx(lines(w.signs),w,w,1) #lines skips Is in array
-    compose(f::Boxx,g::Boxx)=dom(f)==cod(g)?hstackCons(f,g): f ∘ primitive(cod(g),:perm,greedymatchwires(dom(f).signs,cod(g).signs))∘g
+    function compose(f::Boxx,g::Boxx)
+        if dom(f)==cod(g)
+            hstackCons(f,g)
+        #  try to unify the objects, and then apply a permutation
+        #  first of all, see if they have the same objects up to insertion and 
+        #  deletion of Is, e.g. A⊗I⊗B and A⊗B⊗I⊗I
+        elseif  filter(x->x!=0,dom(f).signs)==filter(x->x!=0,cod(g).signs)
+            # now figure out which is longer (therefore has more Is), f or g, 
+            # and pad the other one to the same length.
+            length_domf_minus_length_codg=length(dom(f))-length(cod(g))
+            if  length_domf_minus_length_codg==0 #they are already the same length,
+                                                 # and just need a permutation
+                nothing
+            elseif length_domf_minus_length_codg>0 # we pad g
+                #shouldn't modify given g, passed by value
+                #exponent may not work here, odd behavior in Strict WB test (I think because of strictness)
+                g=g⊗(id(munit(g))^{⊗length_domf_minus_length_codg}) 
+            elseif length_domf_minus_length_codg<0 # we pad f
+                f=f⊗(id(munit(g))^{⊗ (-length_domf_minus_length_codg)}) 
+            end
+            # join, permute, and be merry
+            # consider using a three-argument special hstackCons that makes result length 2
+            hstackCons(
+                       hstackCons(
+                                  f,
+                                  primitive(cod(g),
+                                            :perm,
+                                            greedymatchwires(dom(f).signs,cod(g).signs))),
+                       g)
+        else
+            error("Domain $(dom(f)) and codomain $(cod(g)) cannot be converted to a common object by inserting monoidal units and shifts.")
+        end
+    end
+
     ∘(f::Boxx,g::Boxx)=compose(f,g)
     otimes(f::Boxx,g::Boxx)=vstackCons(f,g)
     otimes(w::Wires,u::Wires)=Wires(vcat(w.signs,u.signs))
@@ -271,8 +304,14 @@ bi= quote
     f.'
 end
 
-# > f.' ∘ id(Wires([0 0 0 -1 -1 -1 0 0 0])) ∘ (id(Wires([0 0 0])) ⊗ mbox(0,-3) ⊗id(Wires([0 0 0])))
+
 
 end
 
 
+# examples
+# f=mbox(2,3)
+# > f.' ∘ id(Wires([0 0 0 -1 -1 -1 0 0 0])) ∘ (id(Wires([0 0 0])) ⊗ mbox(0,-3) ⊗id(Wires([0 0 0])))
+# > a=transp(mbox([1 0 1],[0 1 1]) ∘ mbox([1 0 1],[0 1 1]))
+
+# julia> a ∘ a
