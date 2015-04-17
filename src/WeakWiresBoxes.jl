@@ -6,7 +6,7 @@ using Compose:Context,context,rectangle,circle,fill #doesn't put in scope
 export dom,cod,id,munit,⊗,∘
 import MonoidalCategories:ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
 export dual,transp,ev,coev,tr,Hom,sigma
-export bra,ket,mbox,swap,cup,cap,lines,Boxx,Wires,perm,lshiftupfortransp,rshiftupfortransp
+export bra,ket,mbox,swap,cup,cap,lines,Boxx,Wires
 
 #import MonoidalCategories:associator,associatorinv,leftunitor,rightunitor,leftunitorinv,rightunitorinv
 #import MonoidalCategories:lrweaktranspose
@@ -127,7 +127,7 @@ function lines(signs::Array{Int})
                       Compose.line([(.5,y),(.55,y-.05)]),
                       Compose.line([(.5,y),(.55,y+.05)])]
         elseif signs[i]==0
-            thisline=[Compose.line([(.45,y),(.55,y)])]
+            thisline=[] #Compose.line([(.45,y),(.55,y)])]
         else
             error("invalid line")
         end
@@ -266,29 +266,11 @@ function primitive(w::Wires,kind::Symbol,π::Array)
 end
 
 
-
-#left and right unitors
-#f.' ∘(Boxx(WiresBoxes.swap_overline("black",1),1,1,1)⊗id(munit(Wires(1))))
-#actually in weak cat, dom and cod of a Boxx should always have same number of wires.
-function rshiftupfortransp(f::Boxx)
-    nfdom=length(dom(f).signs)
-    nfcod=length(cod(f).signs)
-    π=vcat( (nfcod+1):(nfcod+nfcod), 1:nfcod, (nfdom+nfcod+1):(nfdom+nfcod+nfdom) ) #middle,beginning,ending
-    primitive(Wires(vcat(zeros(Int,nfcod),dual(cod(f)).signs,zeros(Int,nfdom)) )  ,:perm,π)
-end
-function lshiftupfortransp(f::Boxx)
-    nfdom=length(dom(f).signs)
-    nfcod=length(cod(f).signs)
-    π=vcat( 1:nfcod, (nfdom+nfcod+1):(nfdom+nfcod+nfdom),(nfcod+1):(nfcod+nfcod) ) #beginning, ending, middle
-    w = Wires(vcat(zeros(Int,nfcod),zeros(Int,nfdom),dual(dom(f)).signs) )
-    primitive(w,:perm,π)
-end
-
 @instance! ClosedCompactCategory Wires Boxx begin
     dual(w::Wires)=Wires(-w.signs)
     ev(w::Wires)  = primitive(w,:cap)
     coev(w::Wires)= primitive(w,:cup)
-    transpose(f::Boxx)= lshiftupfortransp(f) ∘ transp(f) ∘ rshiftupfortransp(f)
+#    transpose(f::Boxx)= lshiftupfortransp(f) ∘ transp(f) ∘ rshiftupfortransp(f)
     function sigma(w::Wires,v::Wires)
         n=length(w.signs)
         m=length(v.signs)
