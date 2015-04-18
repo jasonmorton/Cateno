@@ -8,7 +8,9 @@ export PortPair,OneCob,gcompose
 # A representation of a FTS in this category will calculate the normal form 
 # when evaluated.
 
-
+################################################################################
+# Types
+################################################################################
 type PortPair
     cod::Array{Symbol,1}
     dom::Array{Symbol,1}
@@ -26,6 +28,9 @@ type OneCob
 end
 
 
+################################################################################
+# Utilities
+################################################################################
 #assuming NO OVERLAP IN KEYS
 function disjoint_union(g,h)#::GenericAdjacencyList,h::GenericAdjacencyList)
     g = deepcopy(g)
@@ -48,8 +53,10 @@ function disjoint_union(g,h)#::GenericAdjacencyList,h::GenericAdjacencyList)
     return (g,index)
 end
 
-
-#use connected components to compose
+################################################################################
+# 2-ary ops
+################################################################################
+@doc "Apply a ∘ op to two Hom-typed arguments and simplify." ->
 function gcompose(phi::OneCob,psi::OneCob)
     innerports = [phi.innerports;psi.innerports] 
     outerports = PortPair(phi.outerports.cod,psi.outerports.dom)
@@ -94,6 +101,27 @@ function gcompose(phi::OneCob,psi::OneCob)
     OneCob(h,innerports,outerports,loops)
     
 end
+
+
+@doc "Apply an ⊗ op to two Hom-typed arguments and simplify." ->
+function gotimes(phi,psi)
+
+end
+
+
+################################################################################
+# 1-ary ops
+################################################################################
+
+################################################################################
+# 0-ary ops
+################################################################################
+
+# ev(A)
+# id(A)
+# coev(A)
+# morvar(A,B)
+
 
 
 end #module
