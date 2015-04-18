@@ -4,6 +4,7 @@ using Docile
 import Base.in
 using Graphs
 
+export PortPair,OneCob,gcompose
 # A representation of a FTS in this category will calculate the normal form 
 # when evaluated.
 
@@ -26,7 +27,7 @@ end
 
 
 #assuming NO OVERLAP IN KEYS
-function disjoint_union(g::GenericAdjacencyList,h::GenericAdjacencyList)
+function disjoint_union(g,h)#::GenericAdjacencyList,h::GenericAdjacencyList)
     g = deepcopy(g)
     index=Dict([ (v.key,v.index) for v in g.vertices  ]) #not in Graphs.jl?
     
@@ -51,7 +52,7 @@ end
 #use connected components to compose
 function gcompose(phi::OneCob,psi::OneCob)
     innerports = [phi.innerports;psi.innerports] 
-    outerports = [phi.outerports.cod;psi.outerports.dom]
+    outerports = PortPair(phi.outerports.cod,psi.outerports.dom)
     loops = [phi.loops;psi.loops] # this may grow when simplifying
     # initialize a big graph whose vertices are the symbols of all nonloop ports
     g, index = disjoint_union(phi.graph,psi.graph)
@@ -63,7 +64,7 @@ function gcompose(phi::OneCob,psi::OneCob)
     for i=1:n
         phiport = phi.outerports.dom[i]
         psiport = psi.outerports.cod[i]
-        add_edge!(g, index[phiport], index[psiport])
+        add_edge!(g, g.vertices[index[phiport]], g.vertices[index[psiport]])
     end
 
 
@@ -89,7 +90,7 @@ function gcompose(phi::OneCob,psi::OneCob)
             push!(loops,vs[1].key)
         end
     end
-    
+#    return (h,innerports,outerports,loops)
     OneCob(h,innerports,outerports,loops)
     
 end
@@ -176,3 +177,21 @@ end #module
 
 # # which is the neighbour of u
 # println(out_neighbors(u, g))
+
+#tests
+
+# using Graphs, OneCobs
+# pp1=PortPair(1,1) #f:A->A
+# pp2=PortPair(1,1) #f:A->A
+# g1=adjlist(KeyVertex{Symbol}, is_directed=false)
+# u1=add_vertex!(g1,pp1.cod[1])
+# u2=add_vertex!(g1,pp1.dom[1])
+# add_edge!(g1,u1,u2)
+# g2=adjlist(KeyVertex{Symbol}, is_directed=false)
+# v1=add_vertex!(g2,pp2.cod[1])
+# v2=add_vertex!(g2,pp2.dom[1])
+# add_edge!(g2,v1,v2)
+
+# phi=OneCob(g1,[],pp1,[])
+# psi=OneCob(g2,[],pp2,[])
+# gcompose(phi,psi)
