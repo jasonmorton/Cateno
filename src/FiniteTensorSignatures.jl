@@ -33,7 +33,7 @@ typealias MWord Union(Expr,Symbol)
 type OWord
     word::Union(Expr,Symbol)
 end
-
+OWord(o::OWord)=o #idempotent constructor for toggledual
 # This causes object words to be treated as strictly associative in 
 # comparisons, so (A⊗B)⊗C == A⊗(B⊗C). 
 ==(u::OWord,v::OWord)=flattenotree(u.word)==flattenotree(v.word) 
@@ -298,10 +298,15 @@ function toggledual(o::OWord)
     if isa(o.word,Symbol)
         OWord(toggledual(o.word))
     elseif o.word.head==:call && o.word.args[1]==:⊗ 
-        OWord(toggledual(o.word.args[2]) ⊗ toggledual(o.word.args[3]))
+        OWord(OWord(toggledual(o.word.args[2])) ⊗ OWord(toggledual(o.word.args[3])))
     else
         error("can't dualize")
     end
+end
+
+function toggledual(o::Expr) #careful this doesn't apply where unwanted
+    @assert  o.head==:call && o.args[1]==:⊗ 
+    OWord(OWord(toggledual(o.args[2])) ⊗ OWord(toggledual(o.args[3])))
 end
                    
 function toggledual(s::Symbol)
@@ -397,3 +402,6 @@ end
 #media(Boxx,Media.Graphical)
 #pin()
 ##then drawings appear and it is beautiful.
+
+
+#test: toggledual(A⊗A⊗A)
