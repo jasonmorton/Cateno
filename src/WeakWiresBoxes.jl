@@ -35,7 +35,7 @@ Boxx(c,n::Int,m::Int,ell)=Boxx(c,Wires(n),Wires(m),ell)
 writemime(io::IO, m::MIME"image/svg+xml", b::Boxx)=writemime(io::IO, m, b.con)
 
 
-@instance MonoidalCategory Wires Boxx begin #UnitorWeakMC
+@instance MonoidalCategory Wires Boxx begin #UnitorWeakMonoidalCategory
     dom(c::Boxx)=c.inwires
     cod(c::Boxx)=c.outwires
     id(w::Wires)=primitive(w,:line) #Boxx(lines(w.signs),w,w,1) #lines skips Is in array
