@@ -1,6 +1,6 @@
-include("WeakDiagramsFor")
-fts"T;f:I->A⊗dual(A)" #just need the A for cob cat.
-D=diagramsfor(T,ClosedCompactCategory)
+include("WeakDiagramsFor.jl")
+fts"T;f:I->A⊗A_" #just need the A for cob cat.
+D=diagramsfor(T,ClosedCompactCategory).value
 ϕ₃ = ev(dual(A)⊗A)
 ϕ₂ =ev(dual(A)⊗A)⊗id(A⊗dual(A))
 ϕ₁ = id(dual(A)) ⊗ sigma(A,A) ⊗ id(dual(A))

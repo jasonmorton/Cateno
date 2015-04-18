@@ -53,11 +53,37 @@ writemime(io::IO, m::MIME"image/svg+xml", b::Boxx)=writemime(io::IO, m, b.con)
                                                  # and just need a permutation
                 nothing
             elseif length_domf_minus_length_codg>0 # we pad g
-                #shouldn't modify given g, passed by value
-                #exponent may not work here, odd behavior in Strict WB test (I think because of strictness)
-                g=g⊗(id(munit(g))^{⊗length_domf_minus_length_codg}) 
+                #this shouldn't modify given g, passed by value
+                #todo: match padding if possible, e.g. match any Is in the beginning
+                lz=leadin_zeros(dom(f).signs)
+
+                #pad both top and bottom
+                if lz!=0 && (length_domf_minus_length_codg-lz)!=0 
+                    g=(id(munit(g))^{⊗lz}) ⊗ g ⊗ (id(munit(g))^{⊗ (length_domf_minus_length_codg-lz)}) 
+                    
+                # pad top only, nothing left after top Is
+                elseif lz!=0 && (length_domf_minus_length_codg-lz)==0 
+                    g=(id(munit(g))^{⊗lz}) ⊗ g 
+                
+                # pad bottom only, no top Is
+                elseif lz==0
+                    g= g ⊗ (id(munit(g))^{⊗ (length_domf_minus_length_codg)}) 
+                else
+                    error()
+                end
+                
             elseif length_domf_minus_length_codg<0 # we pad f
-                f=f⊗(id(munit(g))^{⊗ (-length_domf_minus_length_codg)}) 
+                lz=leadin_zeros(cod(g).signs)
+                if lz!=0 && (-length_domf_minus_length_codg-lz)!=0  #pad both top and bottom
+                    f=(id(munit(g))^{⊗lz}) ⊗f⊗ (id(munit(g))^{⊗ (-length_domf_minus_length_codg-lz)}) 
+                elseif  lz!=0 && (-length_domf_minus_length_codg-lz)==0 # pad top only
+                    f=(id(munit(g))^{⊗lz}) ⊗f
+                    
+                elseif lz==0 #pad bottom only
+                    f=f⊗ (id(munit(g))^{⊗ (-length_domf_minus_length_codg)}) 
+                else
+                    error()
+                end
             end
             # join, permute, and be merry
             # consider using a three-argument special hstackCons that makes result length 2
@@ -77,6 +103,18 @@ writemime(io::IO, m::MIME"image/svg+xml", b::Boxx)=writemime(io::IO, m, b.con)
     otimes(f::Boxx,g::Boxx)=vstackCons(f,g)
     otimes(w::Wires,u::Wires)=Wires(vcat(w.signs,u.signs))
     munit(::Wires)=Wires([0])  
+end
+
+function leadin_zeros(x::Array{Int})
+    count=0
+    for i=1:length(x)
+        if x[i]==0
+            count=count+1
+        else
+            break
+        end
+    end
+    return count
 end
 
 ##### Associative vertical and horizontal stacking #########
