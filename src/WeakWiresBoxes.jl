@@ -118,12 +118,16 @@ function lines(signs::Array{Int})
     lineContexts=Any[]
     for i=1:N
         y=(i-.5)/N
+        # ycy = Compose.Measure(0,0,y,0,0)
+        # half = Compose.Measure(0,0.5,0,0,0)
         if signs[i]==-1
             thisline=[Compose.line([(0,y),(1,y)]),
                       Compose.line([(.5,y),(.45,y-.05)]),
                       Compose.line([(.5,y),(.45,y+.05)])]
         elseif signs[i]==1
             thisline=[Compose.line([(0,y),(1,y)]),
+                      # Compose.line([(.5,y),(half + .1Compose.w,ycy - .1Compose.h)]),
+                      # Compose.line([(.5,y),(half + .1Compose.w,ycy + .1Compose.h)])]
                       Compose.line([(.5,y),(.55,y-.05)]),
                       Compose.line([(.5,y),(.55,y+.05)])]
         elseif signs[i]==0
@@ -293,7 +297,8 @@ end
 
 # examples
 # f=mbox(2,3)
-# > f.' ∘ id(Wires([0 0 0 -1 -1 -1 0 0 0])) ∘ (id(Wires([0 0 0])) ⊗ mbox(0,-3) ⊗id(Wires([0 0 0])))
-# > a=transp(mbox([1 0 1],[0 1 1]) ∘ mbox([1 0 1],[0 1 1]))
+# f.' ∘ id(Wires([0 0 0 -1 -1 -1 0 0 0])) ∘ (id(Wires([0 0 0])) ⊗ mbox(0,-3) ⊗id(Wires([0 0 0])))
+# a=transp(mbox([1 0 1],[0 1 1]) ∘ mbox([1 0 1],[0 1 1]))
+# a ∘ a
+# mbox([1 -1],[1,-1]) ∘ mbox([1 0 0 0  1],[1 0 0 0 -1 0 0 ]) ∘ ket(2)
 
-# julia> a ∘ a
