@@ -93,7 +93,10 @@ function gcompose(phi::OneCob,psi::OneCob)
             a=add_vertex!(h,externals[1].key)
             b=add_vertex!(h,externals[2].key)
             add_edge!(h,a,b)
+        elseif externals==[]
+            nothing
         else # this has resulted in a loop.  Take the first symbol as a tag
+            println(externals," is a loop")
             push!(loops,vs[1].key)
         end
     end
@@ -116,6 +119,20 @@ end
 ################################################################################
 # 0-ary ops
 ################################################################################
+
+function ev(A)
+    pp = PortPair(0,2) #I->A_⊗A
+    g  =  adjlist(KeyVertex{Symbol}, is_directed=false)
+    u1 = add_vertex!(g,pp.cod[1])
+    u2 = add_vertex!(g,pp.cod[2])
+    add_edge!(g,u1,u2)
+
+    innerports = []
+    outerports = pp
+    loops = []
+
+    OneCob(g,innerports,outerports,loops)
+end
 
 # ev(A)
 # id(A)
@@ -223,3 +240,9 @@ end #module
 # phi=OneCob(g1,[],pp1,[])
 # psi=OneCob(g2,[],pp2,[])
 # gcompose(phi,psi)
+
+
+#a W on its side
+#using OneCobs
+#i=gcompose(OneCobs.ev(1),OneCobs.ev(1))
+#check it has no loops, just two vertices with an edge between them.
