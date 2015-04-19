@@ -1,10 +1,11 @@
 module OneCobs
 using Docile
 @docstrings
-import Base.in
+import Base:in,show
 using Graphs
 
-export PortPair,OneCob,gcompose
+export PortPair,OneCob,gcompose,gotimes
+export id,ev,coev
 # A representation of a FTS in this category will calculate the normal form 
 # when evaluated.
 
@@ -53,6 +54,13 @@ function disjoint_union(g,h)#::GenericAdjacencyList,h::GenericAdjacencyList)
     return (g,index)
 end
 
+onecobgraph()=adjlist(KeyVertex{Symbol}, is_directed=false)
+
+function show(io::IO,v::KeyVertex{Symbol})
+    print(io,"(",join([v.index,string(v.key)[end-2:end]],","),")")
+end
+
+
 ################################################################################
 # 2-ary ops
 ################################################################################
@@ -60,6 +68,8 @@ end
 function gcompose(phi::OneCob,psi::OneCob)
     innerports = [phi.innerports;psi.innerports] 
     outerports = PortPair(phi.outerports.cod,psi.outerports.dom)
+    println("innerports: ",innerports)
+    println("outerports: ",outerports)
     loops = [phi.loops;psi.loops] # this may grow when simplifying
     # initialize a big graph whose vertices are the symbols of all nonloop ports
     g, index = disjoint_union(phi.graph,psi.graph)
@@ -67,48 +77,58 @@ function gcompose(phi::OneCob,psi::OneCob)
     # draw all new edges (identity edges are not needed since we use the ports
     # that would get them as our new external ports
     # this will be different for ⊗
+    println("phi.outerports.dom: ",phi.outerports.dom)
     n=length(phi.outerports.dom) #(==length(psi.outerports.cod))
     for i=1:n
         phiport = phi.outerports.dom[i]
         psiport = psi.outerports.cod[i]
+        println("add edge ", g.vertices[index[phiport]], g.vertices[index[psiport]])
         add_edge!(g, g.vertices[index[phiport]], g.vertices[index[psiport]])
     end
 
 
     # Make a new graph to hold the answer.
-    h = adjlist(KeyVertex{Symbol}, is_directed=false)
+    h = onecobgraph() #adjlist(KeyVertex{Symbol}, is_directed=false)
 
     # Simplify.  Each connected component is an edge of the new graph, iff 
     # it contains two external vertices; otherwise it contains no external 
     # vertices and is a loop.
     cc=connected_components(g)
+#    return g
+    println("Connected components: ",cc)
     for vs in cc
         # find the two exits if they exist
         externals = filter(x->(x.key in outerports) || (x.key in innerports),
                            vs)
         if !isempty(externals)
-            @assert length(externals)==2
+            @assert length(externals)==2 println(externals," wrong length")
             # Add the new edge. I can assume neither side is already added to h, 
             # since these are connected components
             a=add_vertex!(h,externals[1].key)
             b=add_vertex!(h,externals[2].key)
             add_edge!(h,a,b)
-        elseif externals==[]
+        elseif vs==[] #was if externals==[], exactly the loop case.
             nothing
-        else # this has resulted in a loop.  Take the first symbol as a tag
-            println(externals," is a loop")
+        else # this has resulted in a loop.  Take the first symbol is a tag
+            @assert externals==[]
+            println(vs," is a loop")
             push!(loops,vs[1].key)
         end
     end
 #    return (h,innerports,outerports,loops)
     OneCob(h,innerports,outerports,loops)
-    
+
 end
 
 
 @doc "Apply an ⊗ op to two Hom-typed arguments and simplify." ->
 function gotimes(phi,psi)
-
+    innerports = [phi.innerports;psi.innerports] 
+    outerports = PortPair([phi.outerports.cod ; psi.outerports.cod],
+                          [phi.outerports.dom ; psi.outerports.dom])
+    loops = [phi.loops;psi.loops] 
+    g, index = disjoint_union(phi.graph,psi.graph)
+    OneCob(g,innerports,outerports,loops)
 end
 
 
@@ -119,14 +139,15 @@ end
 ################################################################################
 # 0-ary ops
 ################################################################################
-
+@doc "Ignores its argument. ev: I->A⊗A as a 0-ary op.  Note this is a function, rather than a constant, because we need to generate fresh symbols with gensym() for each ev(something) that appears in an expression." ->
 function ev(A)
-    pp = PortPair(0,2) #I->A_⊗A
-    g  =  adjlist(KeyVertex{Symbol}, is_directed=false)
-    u1 = add_vertex!(g,pp.cod[1])
-    u2 = add_vertex!(g,pp.cod[2])
-    add_edge!(g,u1,u2)
+    g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
 
+    pp = PortPair(2,0) #I->A_⊗A
+    u1 = add_vertex!(g,pp.dom[1])
+    u2 = add_vertex!(g,pp.dom[2])
+
+    add_edge!(g,u1,u2)
     innerports = []
     outerports = pp
     loops = []
@@ -134,7 +155,56 @@ function ev(A)
     OneCob(g,innerports,outerports,loops)
 end
 
-# ev(A)
+function coev(A)
+    g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
+
+    pp = PortPair(0,2) #A⊗A_ ->I
+    u1 = add_vertex!(g,pp.cod[1])
+    u2 = add_vertex!(g,pp.cod[2])
+
+    add_edge!(g,u1,u2)
+    innerports = []
+    outerports = pp
+    loops = []
+
+    OneCob(g,innerports,outerports,loops)
+end
+
+function id(A)
+    g  =  onecobgraph()
+
+    pp = PortPair(1,1) #A->A
+    u1 = add_vertex!(g,pp.cod[1])
+    u2 = add_vertex!(g,pp.dom[1])
+
+    add_edge!(g,u1,u2)
+    innerports = []
+    outerports = pp
+    loops = []
+
+    OneCob(g,innerports,outerports,loops)
+    
+end
+
+#unfinished, not clear how to represent this
+#could just decorate an edge with a symbol maybe, in A->A case
+function morvar(ndomwires,ncodwires) #A,A? A,B? dom,cod?  only hand one object now. but morvar could have multi inputs and outputes.
+    g  =  onecobgraph()
+
+    pp = PortPair(ndomwires,ncodwires) #A^{⊗ndomwires}->A^{⊗ncodwires}
+    for i=1:ncodwires
+        u1 = add_vertex!(g,pp.cod[1])
+    end
+    u2 = add_vertex!(g,pp.dom[1])
+
+    add_edge!(g,u1,u2)
+    innerports = []
+    outerports = pp
+    loops = []
+
+    OneCob(g,innerports,outerports,loops)
+    
+end
 # id(A)
 # coev(A)
 # morvar(A,B)
@@ -223,7 +293,9 @@ end #module
 # # which is the neighbour of u
 # println(out_neighbors(u, g))
 
-#tests
+################################################################################
+# Tests: move to testing module when setup
+################################################################################
 
 # using Graphs, OneCobs
 # pp1=PortPair(1,1) #f:A->A
@@ -246,3 +318,11 @@ end #module
 #using OneCobs
 #i=gcompose(OneCobs.ev(1),OneCobs.ev(1))
 #check it has no loops, just two vertices with an edge between them.
+
+
+#Morton-Spivak NF paper with id(1) in place of f for now
+# should get single loop
+# afterphi1=gotimes(id(1),id(1))
+# afterphi2=gcompose(ev(1),afterphi1)
+# afterphi3=gcompose(afterphi2,coev(1))
+#innerports and oiuterports of afterphi1 look odd
