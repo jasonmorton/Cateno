@@ -325,4 +325,10 @@ end #module
 # afterphi1=gotimes(id(1),id(1))
 # afterphi2=gcompose(ev(1),afterphi1)
 # afterphi3=gcompose(afterphi2,coev(1))
-#innerports and oiuterports of afterphi1 look odd
+## result is a OneCob which just has a loop with the symbol from 2 labeling it.
+#∘(∘(ev(1),⊗(id(1),id(1))),coev(1))
+#∘(∘(ev(1),⊗(id(1),f)),coev(1))
+#∘(∘(ev(A),⊗(id(A),f)),coev(A))
+#∘(∘(ev(A),⊗(id(A_),f)),coev(A_)) #want to go from this to tr(f)
+#just functor send A and A_ to 1 and evaluate in operad context should give op
+#then need to reverse it.
