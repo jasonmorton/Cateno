@@ -1,0 +1,19 @@
+machine:
+  pre:
+    - curl -k -L -o julia.tar.gz https://julialang.s3.amazonaws.com/bin/linux/x64/0.3/julia-0.3.8-linux-x86_64.tar.gz
+    - tar -xf julia.tar.gz
+
+checkout:
+
+dependencies:
+
+database:
+
+test:
+  override:
+    - ./ju*/bin/julia test/runtests.jl
+
+deployment:
+
+notify:
+

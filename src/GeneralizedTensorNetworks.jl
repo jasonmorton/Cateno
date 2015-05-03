@@ -3,10 +3,13 @@ module GeneralizedTensorNetworks
 include("MonoidalCategories.jl")
 
 #Symbolic and expression categories
-include("FiniteTensorSchemes.jl")
+include("FiniteTensorSignatures.jl")
 
 # Graphical Categories
-include("WiresBoxes.jl")
+include("WeakWiresBoxes.jl")
+
+# Functors
+include("Representations.jl")
 
 # Quantitative Categories
 include("BinBraKet.jl")
