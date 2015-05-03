@@ -8,5 +8,5 @@ dependencies:
 test:
   override:
     - ls
-    - ../julia-79599ada44/bin/julia test/runtests.jl
+    - ./julia-79599ada44/bin/julia test/runtests.jl
 
