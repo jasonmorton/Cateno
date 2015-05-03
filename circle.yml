@@ -5,5 +5,5 @@ machine:
 
 test:
   override:
-    - bash ./ju*/bin/julia test/runtests.jl
+    - ./ju*/bin/julia test/runtests.jl
 
