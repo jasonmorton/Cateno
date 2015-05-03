@@ -1,7 +1,9 @@
-machine:
+dependencies:
   pre:
     - curl -k -L -o julia.tar.gz https://julialang.s3.amazonaws.com/bin/linux/x64/0.3/julia-0.3.8-linux-x86_64.tar.gz
     - tar -xf julia.tar.gz
+  cache_directories:
+    - julia-79599ada44
 
 test:
   override:
