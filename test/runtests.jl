@@ -1,5 +1,5 @@
 println("Resolving package dependencies:")
-Pkg.resolve() #which REQUIRE does it look at?
+#Pkg.resolve() #which REQUIRE does it look at?
 Pkg.add("Typeclass")
 Pkg.add("Graphs")
 Pkg.add("Docile")
@@ -16,6 +16,9 @@ using MonoidalCategories
 import MonoidalCategories:MonoidalCategory,dom,cod,id,munit,⊗,∘
 include("monoidalcategories.jl")
 println("Monoidalcategories tests passed")
+include("finitetensorsignatures.jl")
+println("FTS tests passed")
+
 #include("intepretations.jl")
 #include("closedcompactcategories.jl")
 #include("binbraket.jl")

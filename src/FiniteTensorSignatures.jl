@@ -82,6 +82,11 @@ type FiniteTensorSignature
     dom::Dict{Symbol,OWord}
     cod::Dict{Symbol,OWord}
 end
+==(T::FiniteTensorSignature,S::FiniteTensorSignature)=
+    T.obvars == S.obvars &&
+    T.morvars == S.morvars &&
+    T.dom == S.dom &&
+    T.cod == S.cod
 
 #A FTS that casts anywhere
 FiniteTensorSignature()=FiniteTensorSignature(Set{Symbol}([]),Set{Symbol}([]),Dict(),Dict())
