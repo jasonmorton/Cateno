@@ -1,6 +1,8 @@
 println("Resolving package dependencies:")
 Pkg.resolve() #which REQUIRE does it look at?
 Pkg.add("Typeclass")
+Pkg.add("Graphs")
+Pkg.add("Docile")
 
 println("Adding src to path")
 #srcpath=joinpath(cd(pwd,".."),"src")
