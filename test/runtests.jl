@@ -1,5 +1,5 @@
 println("Resolving package dependencies:")
-#Pkg.resolve() #which REQUIRE does it look at?
+#Pkg.resolve() #which REQUIRE does it look at?  The one in julia directory.
 Pkg.add("Typeclass")
 Pkg.add("Graphs")
 Pkg.add("Docile")
