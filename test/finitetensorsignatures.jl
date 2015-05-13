@@ -1,4 +1,4 @@
-module temp
+module FiniteTensorSignaturesTests
 using FiniteTensorSignatures, Base.Test
 
 @test FTS("f:a⊗b→c,g:a→b⊗c")==FTS("f:a⊗b→c, g:a→b⊗c")
