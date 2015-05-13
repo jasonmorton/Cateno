@@ -1,6 +1,7 @@
 using MonoidalCategories, Typeclass
 #import OneCobs automatic from below
 import OneCobs.OneCob
+import FiniteTensorSignatures.ObjectWord
 
 #
 # There are two monoidal categories in OneCob: the monoidal category of the
@@ -40,3 +41,36 @@ end
 #     end
 
 # 1 write an interpretation OneCobordismOf::FTS->FTS which turns term=(∘(∘,ev(A), (⊗,id(dual(A)),f)),coev(dual(A))) into the above cob word
+
+
+# really should use wrapper pattern.  Define the minimal onecob as the contents, type with objects and stuff.  So MonCat it with one nothing object, then do a typed version.
+
+
+type WrappedOneCob{Ob}
+    dom::Ob
+    cod::Ob
+    contents::OneCob
+end
+
+type WrappedObjectWord
+    contents::ObjectWord
+end
+
+@instance WrappedObjectWord WrappedOneCob{ObjectWord} begin
+    # dom and cod are functions of the OneCob's outerports' signs
+    # for (dual vs primal) and the label, which must be dualizable
+    # for example ev(A) has dom I and cod A_⊗A
+    dom(f::WrappedOneCob{ObjectWord}) = f.dom
+        # label = f.label
+        # domsymbols = f.outerports.dom
+        # codsymbols = f.outerports.cod
+        # domsigns   = f.domsigns
+        # codsigns   = f.codsigns
+    cod(f::WrappedOneCob{ObjectWord}) = f.cod
+    id(A::WrappedObjectWord) = WrappedOneCob(A,A,OneCob.id(A)) # maybe number
+                                                               # of wires in A
+    compose(f::OneCob,g::OneCob) = WrappedOneCob(dom(g),cod(f),OneCobs.gcompose(f,g))
+    otimes(f::OneCob,g::OneCob) = WrappedOneCob(dom(g),cod(f),OneCobs.gotimes(f,g)
+    otimes(A::PM,B::PM) = error("Why should I")
+    munit(::PM)::PM #????
+end

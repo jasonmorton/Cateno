@@ -219,9 +219,6 @@ function morvar(ndomwires,ncodwires) #A,A? A,B? dom,cod?  only hand one object n
     OneCob(g,innerports,outerports,loops)
     
 end
-# id(A)
-# coev(A)
-# morvar(A,B)
 
 
 
@@ -229,87 +226,6 @@ end #module
 
 
 
-# function morcompose(phi::OneCob,psi::OneCob)
-#     innerports = [phi.innerports;psi.innerports] #but need to relabel somehow, or have a global labeling for all innermost ports in exprsession
-#     outerports = [phi.outerports.cod;psi.outerports.dom]
-#     destination=Dict{Symbol,Symbol}()
-#     for portpair in phi.innerports
-#         n = length(portpair.cod)
-#         for i=1:n 
-#             port = portpair.cod[i]
-#             if phi.destination[port] in phi.innerports
-#                 destination[port]=phi.destination[port] #todo, start with the old dicts
-#             elseif destination(port) in phi.outerports.cod
-#                 destination[port]=phi.destination[port]
-#             elseif destination(port) in phi.outerports.dom
-#                 # send it to cod g port. dom and cod must match, so same number.
-#                 #i.e. we identify phi.outerports.dom and psi.outerports.cod, throw away one set of symbols (higher in tree),
-#                 # then compute the loops and cob of the result.  external vertices go in one hop to known exits.
-#                 # loops of arbitrary complexity must be found and resolved.
-#                 psipartner = psi.outerports.cod[i]
-#                 # does this port loop back to the dom(f), so a cycle can be created?
-#                 phipartner = phi.destination[port] # (loops if in phi.outerports.dom)
-#                 # here are the cases.  Loop creation can be arbitrarily complicated.  In each loop we keep one symbol, assuming direction doesn't matter
-#                 if phipartner in phi.outerports.dom 
-                    
-#                 end
-#             end
-#         end
-#     end
-#     for portpair in psi.innerports
-#         n = length(portpair.cod)
-#         for i=1:n 
-#             port = portpair.cod[i]
-#             if psi.destination[port] in psi.innerports
-#                 destination[port]=psi.destination[port] #todo, start with the old dicts
-#             elseif destination(port) in psi.outerports.cod
-#                 # send it to dom f port. dom and cod must match, so same number.
-#                 destination[port] = phi.outerports.dom[i]
-#                 #the below assignement should be dealt with in the loop for phi.outerports.dom
-#             elseif destination(port) in phi.outerports.dom
-#                 nothing #should be already handled
-#                 #                destination[port]=psi.destination[port]
-#             end
-#         end
-#     end
-#     OneCob(destination,
-#            innerports,
-#            outerports,
-#            numloops)
-# end
-    
-               
-    
-# end
-
-# function morotimes(phi,psi)
-
-# end
-
-
-
-# using Graphs
-
-# # Create new graph
-# g = adjlist(KeyVertex{ASCIIString}, is_directed=false)
-
-# # Add 2 vertices
-# v = add_vertex!(g, "v")
-# u = add_vertex!(g, "u")
-
-# # Add an edge between them
-# add_edge!(g, v, u)
-
-# # This will print:
-
-# #   KeyVertex{ASCIIString}(1,"v")
-
-# # which is the neighbour of u
-# println(out_neighbors(u, g))
-
-################################################################################
-# Tests: move to testing module when setup
-################################################################################
 
 
 
