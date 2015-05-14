@@ -154,7 +154,7 @@ end
 # 0-ary ops
 ################################################################################
 @doc " ev: I->A⊗A as a 0-ary op; argument becomes the label of the resulting OneCob.  Note this is a function, rather than a constant, because we need to generate fresh symbols with gensym() for each ev(something) that appears in an expression.  Each symbol corresponds to a different port or vertex." ->
-function ev(A)
+function ev(A::Symbol)
     g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
 
     pp = PortPair(2,0) #I->A_⊗A
@@ -169,7 +169,7 @@ function ev(A)
     OneCob(g,innerports,outerports,loops,A)
 end
 
-function coev(A)
+function coev(A::Symbol)
     g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
 
     pp = PortPair(0,2) #A⊗A_ ->I
@@ -184,7 +184,7 @@ function coev(A)
     OneCob(g,innerports,outerports,loops,A)
 end
 
-function id(A)
+function id(A::Symbol)
     g  =  onecobgraph()
 
     pp = PortPair(1,1) #A->A
@@ -219,6 +219,59 @@ function morvar(ndomwires,ncodwires) #A,A? A,B? dom,cod?  only hand one object n
     OneCob(g,innerports,outerports,loops)
     
 end
+
+
+
+
+
+
+function ev(nwires::Integer)
+    g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
+
+    pp = PortPair(2,0) #I->A_⊗A
+    u1 = add_vertex!(g,pp.dom[1])
+    u2 = add_vertex!(g,pp.dom[2])
+
+    add_edge!(g,u1,u2)
+    innerports = []
+    outerports = pp
+    loops = []
+
+    OneCob(g,innerports,outerports,loops,nwires)
+end
+
+function coev(A)
+    g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
+
+    pp = PortPair(0,2) #A⊗A_ ->I
+    u1 = add_vertex!(g,pp.cod[1])
+    u2 = add_vertex!(g,pp.cod[2])
+
+    add_edge!(g,u1,u2)
+    innerports = []
+    outerports = pp
+    loops = []
+
+    OneCob(g,innerports,outerports,loops,A)
+end
+
+function id(A)
+    g  =  onecobgraph()
+
+    pp = PortPair(1,1) #A->A
+    u1 = add_vertex!(g,pp.cod[1])
+    u2 = add_vertex!(g,pp.dom[1])
+
+    add_edge!(g,u1,u2)
+    innerports = []
+    outerports = pp
+    loops = []
+
+    OneCob(g,innerports,outerports,loops,A)
+    
+end
+
+
 
 
 

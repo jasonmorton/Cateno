@@ -46,9 +46,9 @@ end
 # really should use wrapper pattern.  Define the minimal onecob as the contents, type with objects and stuff.  So MonCat it with one nothing object, then do a typed version.
 
 
-type WrappedOneCob{Ob}
-    dom::Ob
-    cod::Ob
+type WrappedOneCob #{Ob}
+    dom::WrappedObjectWord
+    cod::WrappedObjectWord
     contents::OneCob
 end
 
@@ -56,17 +56,17 @@ type WrappedObjectWord
     contents::ObjectWord
 end
 
-@instance WrappedObjectWord WrappedOneCob{ObjectWord} begin
+@instance WrappedObjectWord WrappedOneCob begin
     # dom and cod are functions of the OneCob's outerports' signs
     # for (dual vs primal) and the label, which must be dualizable
     # for example ev(A) has dom I and cod A_⊗A
-    dom(f::WrappedOneCob{ObjectWord}) = f.dom
+    dom(f::WrappedOneCob) = f.dom
         # label = f.label
         # domsymbols = f.outerports.dom
         # codsymbols = f.outerports.cod
         # domsigns   = f.domsigns
         # codsigns   = f.codsigns
-    cod(f::WrappedOneCob{ObjectWord}) = f.cod
+    cod(f::WrappedOneCob) = f.cod
     id(A::WrappedObjectWord) = WrappedOneCob(A,A,OneCob.id(A)) # maybe number
                                                                # of wires in A
     compose(f::OneCob,g::OneCob) = WrappedOneCob(dom(g),cod(f),OneCobs.gcompose(f,g))
