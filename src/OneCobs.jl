@@ -154,7 +154,7 @@ end
 # 0-ary ops
 ################################################################################
 @doc " ev: I->A⊗A as a 0-ary op; argument becomes the label of the resulting OneCob.  Note this is a function, rather than a constant, because we need to generate fresh symbols with gensym() for each ev(something) that appears in an expression.  Each symbol corresponds to a different port or vertex." ->
-function ev(A)
+function ev(A::Symbol)
     g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
 
     pp = PortPair(2,0) #I->A_⊗A
@@ -169,7 +169,7 @@ function ev(A)
     OneCob(g,innerports,outerports,loops,A)
 end
 
-function coev(A)
+function coev(A::Symbol)
     g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
 
     pp = PortPair(0,2) #A⊗A_ ->I
@@ -184,7 +184,7 @@ function coev(A)
     OneCob(g,innerports,outerports,loops,A)
 end
 
-function id(A)
+function id(A::Symbol)
     g  =  onecobgraph()
 
     pp = PortPair(1,1) #A->A
@@ -219,6 +219,75 @@ function morvar(ndomwires,ncodwires) #A,A? A,B? dom,cod?  only hand one object n
     OneCob(g,innerports,outerports,loops)
     
 end
+
+
+# Integer number of wires
+
+
+function ev(nwires::Integer)
+    g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
+
+    pp = PortPair(2*nwires,0) #I -> A_^{⊗nwires}⊗A^{⊗nwires}
+    for i=1:(2*nwires)
+        add_vertex!(g,pp.dom[i])
+    end
+    
+    for i=1:nwires
+        u1 = g.vertices[i] 
+        u2 = g.vertices[nwires+i]
+        add_edge!(g,u1,u2)
+    end
+    innerports = []
+    outerports = pp
+    loops = []
+
+    OneCob(g,innerports,outerports,loops)
+end
+
+function coev(nwires::Integer)
+    g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
+
+    pp = PortPair(0,2*nwires) #A^{⊗nwires}⊗A_^{⊗nwires} -> I
+    for i=1:(2*nwires)
+        add_vertex!(g,pp.cod[i])
+    end
+
+    for i=1:nwires
+        u1 = g.vertices[i] 
+        u2 = g.vertices[nwires+i]
+        add_edge!(g,u1,u2)
+    end
+    innerports = []
+    outerports = pp
+    loops = []
+
+    OneCob(g,innerports,outerports,loops)
+end
+
+function id(nwires::Integer)
+    g  =  onecobgraph()
+
+    pp = PortPair(nwires,nwires) #A->A
+    for i=1:nwires
+        add_vertex!(g,pp.cod[i])
+    end
+    for i=1:nwires
+        add_vertex!(g,pp.dom[i])
+    end
+    
+    for i=1:nwires
+        u1 = g.vertices[i] # corresp to pp.cod[i]
+        u2 = g.vertices[nwires+i] #corresp to pp.dom[i]
+        add_edge!(g,u1,u2)
+    end
+    innerports = []
+    outerports = pp
+    loops = []
+
+    OneCob(g,innerports,outerports,loops)
+end
+
+
 
 
 

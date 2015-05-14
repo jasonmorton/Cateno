@@ -55,5 +55,12 @@ gcompose(phi,psi)
 
 #check it has no loops, just two vertices with an edge between them.
 
+#multiple edge 0aries
+@test length(gcompose(ev(2),coev(2)).loops)==2
+@test length(gcompose(gcompose(ev(3),gotimes(id(3),id(3))),coev(3)).loops)==3
+
+
+
+
 
 end
