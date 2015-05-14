@@ -221,54 +221,70 @@ function morvar(ndomwires,ncodwires) #A,A? A,B? dom,cod?  only hand one object n
 end
 
 
-
-
+# Integer number of wires
 
 
 function ev(nwires::Integer)
     g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
 
-    pp = PortPair(2,0) #I->A_⊗A
-    u1 = add_vertex!(g,pp.dom[1])
-    u2 = add_vertex!(g,pp.dom[2])
-
-    add_edge!(g,u1,u2)
+    pp = PortPair(2*nwires,0) #I -> A_^{⊗nwires}⊗A^{⊗nwires}
+    for i=1:(2*nwires)
+        add_vertex!(g,pp.dom[i])
+    end
+    
+    for i=1:nwires
+        u1 = g.vertices[i] 
+        u2 = g.vertices[nwires+i]
+        add_edge!(g,u1,u2)
+    end
     innerports = []
     outerports = pp
     loops = []
 
-    OneCob(g,innerports,outerports,loops,nwires)
+    OneCob(g,innerports,outerports,loops)
 end
 
-function coev(A)
+function coev(nwires::Integer)
     g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
 
-    pp = PortPair(0,2) #A⊗A_ ->I
-    u1 = add_vertex!(g,pp.cod[1])
-    u2 = add_vertex!(g,pp.cod[2])
+    pp = PortPair(0,2*nwires) #A^{⊗nwires}⊗A_^{⊗nwires} -> I
+    for i=1:(2*nwires)
+        add_vertex!(g,pp.cod[i])
+    end
 
-    add_edge!(g,u1,u2)
+    for i=1:nwires
+        u1 = g.vertices[i] 
+        u2 = g.vertices[nwires+i]
+        add_edge!(g,u1,u2)
+    end
     innerports = []
     outerports = pp
     loops = []
 
-    OneCob(g,innerports,outerports,loops,A)
+    OneCob(g,innerports,outerports,loops)
 end
 
-function id(A)
+function id(nwires::Integer)
     g  =  onecobgraph()
 
-    pp = PortPair(1,1) #A->A
-    u1 = add_vertex!(g,pp.cod[1])
-    u2 = add_vertex!(g,pp.dom[1])
-
-    add_edge!(g,u1,u2)
+    pp = PortPair(nwires,nwires) #A->A
+    for i=1:nwires
+        add_vertex!(g,pp.cod[i])
+    end
+    for i=1:nwires
+        add_vertex!(g,pp.dom[i])
+    end
+    
+    for i=1:nwires
+        u1 = g.vertices[i] # corresp to pp.cod[i]
+        u2 = g.vertices[nwires+i] #corresp to pp.dom[i]
+        add_edge!(g,u1,u2)
+    end
     innerports = []
     outerports = pp
     loops = []
 
-    OneCob(g,innerports,outerports,loops,A)
-    
+    OneCob(g,innerports,outerports,loops)
 end
 
 
