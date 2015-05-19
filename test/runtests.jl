@@ -10,17 +10,12 @@ srcpath=joinpath(pwd(),"src")
 push!(LOAD_PATH, srcpath)
 
 println("Running tests:")
-using Base.Test, Typeclass
-#using GeneralizedTensorNetworks #.MonoidalCategories
-using MonoidalCategories
-import MonoidalCategories:MonoidalCategory,dom,cod,id,munit,⊗,∘
-include("monoidalcategories.jl")
-println("Monoidalcategories tests passed")
-include("finitetensorsignatures.jl")
-println("FTS tests passed")
 
+include("monoidalcategories.jl")
+include("closedcompactcategories.jl")
+include("wellsupportedclosedcompactcategories.jl")
+include("finitetensorsignatures.jl")
 #include("intepretations.jl")
-#include("closedcompactcategories.jl")
 #include("binbraket.jl")
 include("onecobs.jl")
-println("OneCobs tests passed")
+

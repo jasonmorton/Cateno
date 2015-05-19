@@ -3,10 +3,11 @@
 module MonoidalCategories
 export MonoidalCategory,dom,cod,id,munit,⊗,∘,comperr
 export ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma,σ
+export WellSupportedClosedCompactCategory,delta,mu,epsilon,u
 export DaggerClosedCompactCategory,dagger
+
 #export associator,associatorinv,leftunitor,rightunitor,leftunitorinv,rightunitorinv
 #export lrweaktranspose
-
 
 using Typeclass
 import Base:show,ctranspose,transpose
@@ -64,6 +65,19 @@ end
     transpose(f::Mor)=transp(f) # f.' notation.  This by default won't override.
     σ(A::Ob,B::Ob)=sigma(A,B) #not specializing for some reason
 end
+
+
+
+#Assuming Ob Mor is a CCC
+@class WellSupportedClosedCompactCategory Ob Mor begin
+    delta(A::Ob)::Mor #A→A ⊗ A #how do specify this type info? Mor{A,A⊗A} ?
+    mu(A::Ob)::Mor #A→A ⊗ A
+    epsilon(A::Ob)::Mor #A→I
+    u(A::Ob)::Mor #I→A
+end 
+#s.t. axioms and compat with CCC structure.
+
+#instance MonoidalMonad A => WSCC A ...
 
 
 

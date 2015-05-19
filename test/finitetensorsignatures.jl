@@ -19,5 +19,5 @@ merged= f ⊗ ϕ
 
 # tests for MC axioms.  This could be generic for any new module implementing an interface, using randomly generated instantiations like typecheck.
 
-
+println("Finite Tensor Signatures tests passed")
 end

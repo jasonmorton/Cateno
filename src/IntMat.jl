@@ -8,6 +8,9 @@ export dom,cod,id,munit,⊗,∘
 import MonoidalCategories:ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
 export dual,transp,ev,coev,tr,Hom,sigma
 
+import MonoidalCategories:WellSupportedClosedCompactCategory,delta,mu,epsilon,u
+export delta,mu,epsilon,u
+
 typealias Mat Matrix{Float64}
 
 @instance MonoidalCategory Int Mat begin
@@ -40,5 +43,22 @@ end
     Hom(A::Int,B::Int)=dual(A)⊗B
     sigma(A::Int,B::Int)=swapmat(A,B)      #A⊗B→B⊗A
 end
+
+
+
+@instance WellSupportedClosedCompactCategory Int Mat begin
+    function delta(A::Int) #A→A ⊗ A 
+        out=zeros(A*A,A)
+        for i=1:A
+            out[A*(i-1)+i,i]=1
+        end
+        out
+    end
+    mu(A::Int)=delta(A).' #A→A ⊗ A
+    epsilon(A::Int)=ones(1,A) #A→I
+    u(A::Int)=ones(A,1) #I→A
+end 
+
+
 
 end
