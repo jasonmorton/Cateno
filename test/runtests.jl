@@ -13,8 +13,9 @@ println("Running tests:")
 
 include("monoidalcategories.jl")
 include("closedcompactcategories.jl")
-include("wellsupportedclosedcompactcategories.jl")
 include("finitetensorsignatures.jl")
+include("wellsupportedclosedcompactcategories.jl")
+
 #include("intepretations.jl")
 #include("binbraket.jl")
 include("onecobs.jl")
