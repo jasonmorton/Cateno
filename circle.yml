@@ -8,5 +8,6 @@ dependencies:
 test:
   override:
     - ls
+    - ls test
     - ./julia-79599ada44/bin/julia test/runtests.jl
 
