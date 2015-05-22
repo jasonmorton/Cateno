@@ -27,8 +27,8 @@ end
 type Representation#{ObjectType,MorphismType}
     fts::FiniteTensorSignature
     X::Class #XCategory
-    obdict::Dict#{Symbol,ObjectType}
-    mordict::Dict#{Symbol,MorphismType}
+    obdict::Dict#{Symbol,ObjectType}    #might be better as a function
+    mordict::Dict#{Symbol,MorphismType} #might be better as a function
     value::Function
     # inner cons was enforcing all obj and mor mapped, and that dom cods match.
     # now just constructs value function

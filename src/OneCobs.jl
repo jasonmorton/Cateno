@@ -12,6 +12,7 @@ export id,ev,coev
 ################################################################################
 # Types
 ################################################################################
+@doc "Holds a pair of ports, cod and dom, both of which are arrays of symbols."->
 type PortPair
     cod::Array{Symbol,1}
     dom::Array{Symbol,1}
@@ -200,30 +201,8 @@ function id(A::Symbol)
     
 end
 
-#unfinished, not clear how to represent this
-#could just decorate an edge with a symbol maybe, in A->A case
-function morvar(ndomwires,ncodwires) #A,A? A,B? dom,cod?  only hand one object now. but morvar could have multi inputs and outputes.
-    g  =  onecobgraph()
-
-    pp = PortPair(ndomwires,ncodwires) #A^{⊗ndomwires}->A^{⊗ncodwires}
-    for i=1:ncodwires
-        u1 = add_vertex!(g,pp.cod[1])
-    end
-    u2 = add_vertex!(g,pp.dom[1])
-
-    add_edge!(g,u1,u2)
-    innerports = []
-    outerports = pp
-    loops = []
-
-    OneCob(g,innerports,outerports,loops)
-    
-end
-
 
 # Integer number of wires
-
-
 function ev(nwires::Integer)
     g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
 
@@ -276,8 +255,8 @@ function id(nwires::Integer)
     end
     
     for i=1:nwires
-        u1 = g.vertices[i] # corresp to pp.cod[i]
-        u2 = g.vertices[nwires+i] #corresp to pp.dom[i]
+        u1 = g.vertices[i] # vertex corresp to pp.cod[i]
+        u2 = g.vertices[nwires+i] # vertex corresp to pp.dom[i]
         add_edge!(g,u1,u2)
     end
     innerports = []
@@ -287,11 +266,33 @@ function id(nwires::Integer)
     OneCob(g,innerports,outerports,loops)
 end
 
+function morvar(ndomwires::Integer,ncodwires::Integer, f::Symbol) #A,A? A,B? dom,cod?  only hand one object now. but morvar could have multi inputs and outputes.
+    g  =  onecobgraph()
+
+    pp = PortPair(ndomwires,ncodwires) #A^{⊗ndomwires}->A^{⊗ncodwires}
+
+    for i=1:codnwires
+        add_vertex!(g,pp.cod[i])
+    end
+    for i=1:domnwires
+        add_vertex!(g,pp.dom[i])
+    end
+
+    # there are no internal edges.
+    
+    innerports = [] # this is a 0-ary op
+    outerports = pp
+    loops = []
+
+    OneCob(g,innerports,outerports,loops,f)
+    
+end
 
 
 
 
-end #module
+
+end #module OneCobs
 
 
 

@@ -9,7 +9,8 @@ export dual,transp,ev,coev,tr,Hom,sigma
 export dagger
 export OWord,ObjectWord,MorphismWord #temp
 
-
+using Docile
+@docstrings
 using Typeclass
 import Base:show,ctranspose,transpose
 import Base.Meta.quot
@@ -392,15 +393,25 @@ end
 
 ctranspose(f::MorphismWord)=dagger(f) #f' notation
 
+
+
+#todo assert is closedcpt cat word
+@doc """
+Given a word w over a Finite Tensor Scheme T in a Closed Compact Category, OneCobordismWord(w) is a word over (conceptually an independent copy of T) such that the diagrammatic representation of OneCobordismWord(w) is the cobordism when w is thought of as an operad in OneCob.  Used mainly for debugging normal form algorithms and thinking about the sequence of operations needed to compute the value of w in some quantitative category.
+""" ->
+function OneCobordismWord(w::MorphismWord)
+    
+
 end
 
+
+
+end #module
 #next: tests for this functionality, including Interpretations
 #Then: dungeon and SRel (or just implement BP for SRel)
 #Then: Graphical orbit calculations
 #Then: numerical word problems (HDRA/QPL)
 #Then: MC enriched over vector spaces so we can 3f+g
-
-
 
 #using Blink
 #BlinkDisplay.init()
