@@ -297,19 +297,21 @@ function morvar(ndomwires::Integer,ncodwires::Integer, f::Symbol)
         add_vertex!(g,ipp.dom[i])
     end
 
-    for i=1:ncodwires
-        u1 = g.vertices[i] # vertex corresp to pp.cod[i]
-        u2 = g.vertices[nwires+i] # vertex corresp to pp.dom[i]
+    # so the order of the vertices is
+    # o.cod, o.dom, i.cod, i.dom
+    
+    for i=1:(ncodwires+ndomwires)
+        u1 = g.vertices[i] # vertex in to opp
+        u2 = g.vertices[(ncodwires+ndomwires)+i] # vertex in ipp
         add_edge!(g,u1,u2)
     end
 
-
-    
+   
     
     # there are no internal edges.
     #should have innerports and edges, carrying the label.
     
-    innerports = ipp # this is a 0-ary op, but the innerports carry the label
+    innerports = [ipp] # this is a 0-ary op, but the innerports carry the label
     outerports = opp
     loops = []
 
@@ -329,3 +331,4 @@ end #module OneCobs
 
 
 
+#using OneCobs; f = morvar(1,1,:f); afterphi1 = gotimes(id(1),f)

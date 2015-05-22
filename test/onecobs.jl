@@ -26,6 +26,23 @@ afterphi3=gcompose(afterphi2,coev(1))
 #just functor send A and A_ to 1 and evaluate in operad context should give op
 #then need to reverse it.
 
+# Morton-Spivak NF paper with a morvar for f
+f = morvar(1,1,:f)
+afterphi1 = gotimes(id(1),f)
+afterphi2=gcompose(ev(1),afterphi1)
+afterphi3=gcompose(afterphi2,coev(1))
+@test isempty(afterphi3.loops)
+@test length(afterphi3.graph.vertices)==2
+@test map(length,afterphi3.graph.adjlist) ==[1,1]
+@test isempty(afterphi3.outerports.dom)
+@test isempty(afterphi3.outerports.cod)
+@test length(afterphi3.innerports)==1
+@test afterphi3.innerports[1].label==:f
+# so this is trace of f
+
+
+
+
 #Symbolic labels
 A=:A
 afterphi1=gotimes(id(A),id(A))
