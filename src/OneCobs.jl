@@ -5,22 +5,31 @@ import Base:in,show
 using Graphs
 
 export PortPair,OneCob,gcompose,gotimes, isloop
-export id,ev,coev
+export id,ev,coev,morvar
 # A representation of a FTS in this category will calculate the normal form 
 # when evaluated.
 
 ################################################################################
 # Types
 ################################################################################
-@doc "Holds a pair of ports, cod and dom, both of which are arrays of symbols."->
+# consider AbstractPortPair, InnerPortPair (has label), OuterPortPair (no label)
+@doc "Holds a pair of ports, cod and dom, both of which are arrays of symbols.  Since some innermost PortPairs can correspond to morphism variables, so there is an optional Symbol label for a portpair."->
 type PortPair
     cod::Array{Symbol,1}
     dom::Array{Symbol,1}
+    label::Symbol
 end
+PortPair(cod::Array{Symbol,1},dom::Array{Symbol,1})=PortPair(cod,dom,:unlabled)
+# warning, flipped order
+PortPair(d::Integer,c::Integer) = PortPair([gensym() for i in 1:c],
+                                           [gensym() for i in 1:d])
+PortPair(d::Integer,c::Integer,f::Symbol) = PortPair([gensym() for i in 1:c],
+                                                     [gensym() for i in 1:d],
+                                                     f)
+
+
 in(item,p::PortPair) = item in p.cod || item in p.dom
 in(item,ps::Array{PortPair}) = any([item in p for p in ps])
-# warning, flipped order
-PortPair(d::Integer,c::Integer) = PortPair([gensym() for i in 1:c],[gensym() for i in 1:d]) 
 
 type OneCob
     graph::GenericAdjacencyList{KeyVertex{Symbol},Array{KeyVertex{Symbol},1},Array{Array{KeyVertex{Symbol},1},1}}
@@ -266,25 +275,45 @@ function id(nwires::Integer)
     OneCob(g,innerports,outerports,loops)
 end
 
-function morvar(ndomwires::Integer,ncodwires::Integer, f::Symbol) #A,A? A,B? dom,cod?  only hand one object now. but morvar could have multi inputs and outputes.
+@doc """
+morvar differs in that it can have differing numbers of domwires and codwires, and can attach a symbol to its portpair (usually for a morphism variable).
+""" ->
+function morvar(ndomwires::Integer,ncodwires::Integer, f::Symbol) 
     g  =  onecobgraph()
+    #A^{⊗ndomwires}->A^{⊗ncodwires}
+    opp = PortPair(ndomwires,ncodwires) 
+    ipp = PortPair(ndomwires,ncodwires,f)
 
-    pp = PortPair(ndomwires,ncodwires) #A^{⊗ndomwires}->A^{⊗ncodwires}
-
-    for i=1:codnwires
-        add_vertex!(g,pp.cod[i])
+    for i=1:ncodwires
+        add_vertex!(g,opp.cod[i])
     end
-    for i=1:domnwires
-        add_vertex!(g,pp.dom[i])
+    for i=1:ndomwires
+        add_vertex!(g,opp.dom[i])
+    end
+    for i=1:ncodwires
+        add_vertex!(g,ipp.cod[i])
+    end
+    for i=1:ndomwires
+        add_vertex!(g,ipp.dom[i])
     end
 
-    # there are no internal edges.
+    for i=1:ncodwires
+        u1 = g.vertices[i] # vertex corresp to pp.cod[i]
+        u2 = g.vertices[nwires+i] # vertex corresp to pp.dom[i]
+        add_edge!(g,u1,u2)
+    end
+
+
     
-    innerports = [] # this is a 0-ary op
-    outerports = pp
+    
+    # there are no internal edges.
+    #should have innerports and edges, carrying the label.
+    
+    innerports = ipp # this is a 0-ary op, but the innerports carry the label
+    outerports = opp
     loops = []
 
-    OneCob(g,innerports,outerports,loops,f)
+    OneCob(g,innerports,outerports,loops)
     
 end
 
