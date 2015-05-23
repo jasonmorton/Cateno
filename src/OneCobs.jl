@@ -2,10 +2,11 @@ module OneCobs
 using Docile
 @docstrings
 import Base:in,show
+import Base:transpose
 using Graphs
 
 export PortPair,OneCob,gcompose,gotimes, isloop
-export id,ev,coev,morvar
+export gid,gev,gcoev,gmorvar
 # A representation of a FTS in this category will calculate the normal form 
 # when evaluated.
 
@@ -27,6 +28,8 @@ PortPair(d::Integer,c::Integer,f::Symbol) = PortPair([gensym() for i in 1:c],
                                                      [gensym() for i in 1:d],
                                                      f)
 
+==(pp1::PortPair,pp2::PortPair) = pp1.cod == pp2.cod && pp1.dom == pp2.dom && pp1.label == pp2.label
+
 
 in(item,p::PortPair) = item in p.cod || item in p.dom
 in(item,ps::Array{PortPair}) = any([item in p for p in ps])
@@ -39,6 +42,9 @@ type OneCob
     label #usually a symbol
 end
 OneCob(graph,innerports,outerports,loops)=OneCob(graph,innerports,outerports,loops,:unlabeled) #default label
+==(oc1::OneCob,oc2::OneCob) = oc1.graph==oc2.graph && oc1.innerports == oc2.innerports && oc1.outerports == oc2.outerports && oc1.loops == oc2.loops && oc1.label == oc2.label
+
+#also need an isom where symbols are allowed to change
 
 
 ################################################################################
@@ -68,6 +74,10 @@ function disjoint_union(g,h)#::GenericAdjacencyList,h::GenericAdjacencyList)
 end
 
 onecobgraph()=adjlist(KeyVertex{Symbol}, is_directed=false)
+==(g::GenericAdjacencyList,h::GenericAdjacencyList) = g.vertices == h.vertices && g.adjlist == h.adjlist
+==(k::KeyVertex{Symbol},l::KeyVertex{Symbol}) = k.index == l.index && k.key == l.key
+
+
 
 function show(io::IO,v::KeyVertex{Symbol})
     print(io,"(",join([v.index,string(v.key)[end-2:end]],","),")")
@@ -115,7 +125,7 @@ function gcompose(phi::OneCob,psi::OneCob)
     # vertices and is a loop.
     cc=connected_components(g)
 #    return g
-    # println("Connected components: ",cc)
+    println("Connected components: ",cc)
     for vs in cc
         # find the two exits if they exist
         externals = filter(x->(x.key in outerports) || (x.key in innerports),
@@ -129,7 +139,7 @@ function gcompose(phi::OneCob,psi::OneCob)
             add_edge!(h,a,b)
         elseif vs==[] #was if externals==[], exactly the loop case.
             nothing
-        else # this has resulted in a loop.  Take the first symbol is a tag
+        else # this has resulted in a loop.  Take the first symbol as a tag
             @assert externals==[]
             # println(vs," is a loop")
             push!(loops,vs[1].key)
@@ -164,7 +174,7 @@ end
 # 0-ary ops
 ################################################################################
 @doc " ev: I->A⊗A as a 0-ary op; argument becomes the label of the resulting OneCob.  Note this is a function, rather than a constant, because we need to generate fresh symbols with gensym() for each ev(something) that appears in an expression.  Each symbol corresponds to a different port or vertex." ->
-function ev(A::Symbol)
+function gev(A::Symbol)
     g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
 
     pp = PortPair(2,0) #I->A_⊗A
@@ -179,7 +189,7 @@ function ev(A::Symbol)
     OneCob(g,innerports,outerports,loops,A)
 end
 
-function coev(A::Symbol)
+function gcoev(A::Symbol)
     g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
 
     pp = PortPair(0,2) #A⊗A_ ->I
@@ -194,7 +204,7 @@ function coev(A::Symbol)
     OneCob(g,innerports,outerports,loops,A)
 end
 
-function id(A::Symbol)
+function gid(A::Symbol)
     g  =  onecobgraph()
 
     pp = PortPair(1,1) #A->A
@@ -212,7 +222,7 @@ end
 
 
 # Integer number of wires
-function ev(nwires::Integer)
+function gev(nwires::Integer)
     g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
 
     pp = PortPair(2*nwires,0) #I -> A_^{⊗nwires}⊗A^{⊗nwires}
@@ -232,7 +242,7 @@ function ev(nwires::Integer)
     OneCob(g,innerports,outerports,loops)
 end
 
-function coev(nwires::Integer)
+function gcoev(nwires::Integer)
     g  =  onecobgraph() # adjlist(KeyVertex{Symbol}, is_directed=false)
 
     pp = PortPair(0,2*nwires) #A^{⊗nwires}⊗A_^{⊗nwires} -> I
@@ -252,7 +262,7 @@ function coev(nwires::Integer)
     OneCob(g,innerports,outerports,loops)
 end
 
-function id(nwires::Integer)
+function gid(nwires::Integer)
     g  =  onecobgraph()
 
     pp = PortPair(nwires,nwires) #A->A
@@ -278,7 +288,7 @@ end
 @doc """
 morvar differs in that it can have differing numbers of domwires and codwires, and can attach a symbol to its portpair (usually for a morphism variable).
 """ ->
-function morvar(ndomwires::Integer,ncodwires::Integer, f::Symbol) 
+function gmorvar(ndomwires::Integer,ncodwires::Integer, f::Symbol) 
     g  =  onecobgraph()
     #A^{⊗ndomwires}->A^{⊗ncodwires}
     opp = PortPair(ndomwires,ncodwires) 
@@ -306,9 +316,6 @@ function morvar(ndomwires::Integer,ncodwires::Integer, f::Symbol)
         add_edge!(g,u1,u2)
     end
 
-   
-    
-    # there are no internal edges.
     #should have innerports and edges, carrying the label.
     
     innerports = [ipp] # this is a 0-ary op, but the innerports carry the label
@@ -328,7 +335,3 @@ end #module OneCobs
 
 
 
-
-
-
-#using OneCobs; f = morvar(1,1,:f); afterphi1 = gotimes(id(1),f)
