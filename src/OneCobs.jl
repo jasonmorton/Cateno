@@ -47,6 +47,7 @@ OneCob(graph,innerports,outerports,loops)=OneCob(graph,innerports,outerports,loo
 #also need an isom where symbols are allowed to change
 
 
+
 ################################################################################
 # Utilities
 ################################################################################
@@ -74,8 +75,35 @@ function disjoint_union(g,h)#::GenericAdjacencyList,h::GenericAdjacencyList)
 end
 
 onecobgraph()=adjlist(KeyVertex{Symbol}, is_directed=false)
-==(g::GenericAdjacencyList,h::GenericAdjacencyList) = g.vertices == h.vertices && g.adjlist == h.adjlist
+==(g::GenericAdjacencyList,h::GenericAdjacencyList) = graphsequal(g,h)#g.vertices == h.vertices && g.adjlist == h.adjlist
 ==(k::KeyVertex{Symbol},l::KeyVertex{Symbol}) = k.index == l.index && k.key == l.key
+
+
+function makeedgeset(g::GenericAdjacencyList)
+#    edgelist1=edge_type(g)[] # Array{Any,g1.graph.nedges}
+    # for i = 1:length(g1.graph.vertices)
+    #     for j in g1.graph.adjlist[i]
+    #         push!(edgelist1, (g1.graph.vertices[i],j))
+    #     end
+    # end
+    edge_set = Set()
+    for u in vertices(g)
+        for v in Graphs.out_neighbors(u,g)
+            push!(edge_set,(u.key,v.key))
+        end
+    end
+
+    edge_set
+end
+
+function graphsequal(g1,g2)
+    if Set([a.key for a  in g1.vertices])!=Set([a.key for a in g2.vertices])
+        return false
+    end
+    edgeset1=makeedgeset(g1)
+    edgeset2=makeedgeset(g2)
+    edgeset1 == edgeset2
+end
 
 
 
@@ -98,8 +126,8 @@ end
 function gcompose(phi::OneCob,psi::OneCob)
     innerports = [phi.innerports;psi.innerports] 
     outerports = PortPair(phi.outerports.cod,psi.outerports.dom)
-    # println("innerports: ",innerports)
-    # println("outerports: ",outerports)
+    println("innerports: ",innerports)
+    println("outerports: ",outerports)
     loops = [phi.loops;psi.loops] # this may grow when simplifying
     # initialize a big graph whose vertices are the symbols of all nonloop ports
     g, index = disjoint_union(phi.graph,psi.graph)
@@ -112,7 +140,7 @@ function gcompose(phi::OneCob,psi::OneCob)
     for i=1:n
         phiport = phi.outerports.dom[i]
         psiport = psi.outerports.cod[i]
-        # println("add edge ", g.vertices[index[phiport]], g.vertices[index[psiport]])
+        println("add edge ", g.vertices[index[phiport]], g.vertices[index[psiport]])
         add_edge!(g, g.vertices[index[phiport]], g.vertices[index[psiport]])
     end
 

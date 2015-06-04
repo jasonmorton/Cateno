@@ -114,11 +114,20 @@ afterphi3=gcompose(afterphi2,gcoev(2))
 @test tr(f) == tr(f) #some work to get equality testing to work here
 @test tr(f) == tr(f∘id(dom(f)))
 @test tr(transp(f)) == tr(f.')  #ensure f.' is dispatching not doing default transpose(x) = x
-@test tr(g) == tr(g.') #these are giving graphs with different ordering of vertices.
+
+
+
+# as can be checked by hand, taking trace of g and g.' via the onecob op method yields graphs with different presentations (vertex orders).  In terms of symbols and edges, the graphs will be the same.  Thus to make these equal we implemented equality of graphs to check that the vertex set and edge set is the same.  See the makeedgeset and graphsequal functions in OneCobs.jl
+
+@test tr(g) == tr(g.') #these are giving graphs with different ordering of vertices.  As it should be, if you work it out on paper.
 @test tr(f) == tr(f.') #these are giving graphs with different ordering of vertices.
 
+
+
+@test g ∘ id(dom(g)) == g
+
+# gensym interacts badly with multiple occurances of $g$.  We need new symbols for each copy of g.
 @test g ∘ g == g ∘ g #not working, errors out
 @test f ∘ f == f ∘ f #not working, errors out
-
 
 end
