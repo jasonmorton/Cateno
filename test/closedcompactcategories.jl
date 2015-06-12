@@ -52,5 +52,7 @@ A = dom(f^{⊗3})
 @test ev(A) ∘ coev(A) == (ev(B) ∘ coev(B)) ⊗ ( ev(B) ∘ coev(B) ) ⊗ ( ev(B) ∘ coev(B))
 
 
+#todo: axiom test suite which can be applied to any CCC implementation.
+
 println("Closed Compact Categories tests passed")
 end
