@@ -40,9 +40,17 @@ using IntMat
 # end
 
 
+
 ccctrace(f) = (ev(dual(dom(f)))) ∘ (f ⊗ id(dual(dom(f)))) ∘ coev(dom(f))
 fmat=randn(10,10)
 @test_approx_eq ccctrace(fmat) trace(fmat)
+f=fmat
+B = dom(f)
+@test  (id(B) ⊗ ev(B)) ∘ (coev(B) ⊗ id(B))  == id(B)
+A = dom(f^{⊗3})
+@test ev(A) ∘ coev(A) == ev(B) ∘ coev(B) ∘ ev(B) ∘ coev(B) ∘ ev(B) ∘ coev(B)
+@test ev(A) ∘ coev(A) == (ev(B) ∘ coev(B)) ⊗ ( ev(B) ∘ coev(B) ) ⊗ ( ev(B) ∘ coev(B))
+
 
 println("Closed Compact Categories tests passed")
 end

@@ -34,6 +34,23 @@ PortPair(d::Integer,c::Integer,f::Symbol) = PortPair([gensym() for i in 1:c],
 in(item,p::PortPair) = item in p.cod || item in p.dom
 in(item,ps::Array{PortPair}) = any([item in p for p in ps])
 
+function replacesymbol(s::Symbol,n::Symbol,p::PortPair)
+    q=deepcopy(p)
+    if s in q.dom
+        ix = findfirst(q.dom,s)
+        q.dom[ix] = n
+        q
+    elseif s in q.cod
+        ix = findfirst(q.cod,s)
+        q.cod[ix] = n
+        q
+    else
+        p
+    end
+end
+
+
+
 type OneCob
     graph::GenericAdjacencyList{KeyVertex{Symbol},Array{KeyVertex{Symbol},1},Array{Array{KeyVertex{Symbol},1},1}}
     innerports::Array{PortPair,1}
@@ -42,9 +59,26 @@ type OneCob
     label #usually a symbol
 end
 OneCob(graph,innerports,outerports,loops)=OneCob(graph,innerports,outerports,loops,:unlabeled) #default label
-==(oc1::OneCob,oc2::OneCob) = oc1.graph==oc2.graph && oc1.innerports == oc2.innerports && oc1.outerports == oc2.outerports && oc1.loops == oc2.loops && oc1.label == oc2.label
 
-#also need an isom where symbols are allowed to change
+function ==(oc1::OneCob,oc2::OneCob)
+    # At first, (id(A) ⊗ ev(A)) ∘ (coev(A) ⊗ id(A))  != id(A)  because they are merely isomorphic: the new symbols being generated in each call. To fix this, we compare OneCobs with no innerports by composing them with something
+    if isempty(oc1.innerports)
+        domwires = length(oc1.outerports.dom) #dom(oc1).nwires
+        temp = gmorvar(domwires,domwires,gensym())
+        return gcompose(oc1,temp) == gcompose(oc2,temp)
+    end
+        
+    oc1.graph==oc2.graph && Set(oc1.innerports) == Set(oc2.innerports) && oc1.outerports == oc2.outerports && length(oc1.loops) == length(oc2.loops) && oc1.label == oc2.label
+    
+end
+
+function show(io::IO,o::OneCob)
+    println(io,o.graph,o.graph.vertices," adjlist: ",o.graph.adjlist)
+    println(io,"innerports:",o.innerports)
+    println(io,"outerports:",o.outerports)
+    println(io,"loops:",o.loops)
+end
+#also need an isom where gensym symbols are allowed to change
 
 
 
@@ -156,19 +190,39 @@ function gcompose(phi::OneCob,psi::OneCob)
     println("Connected components: ",cc)
     for vs in cc
         # find the two exits if they exist
-        externals = filter(x->(x.key in outerports) || (x.key in innerports),
-                           vs)
+#        externals = filter(x->(x.key in outerports) || (x.key in innerports),vs)
+        outerexternals = filter(x->(x.key in outerports) ,vs)
+        innerexternals = filter(x->(x.key in innerports) ,vs)
+        externals = [outerexternals,innerexternals]
+        println("outerexternal:",outerexternals,", innerexternal:",innerexternals," externals:",externals)
         if !isempty(externals)
-            @assert length(externals)==2 println(externals," wrong length")
+            @assert length(externals)==2  println("outerexternal:",outerexternals,", innerexternal:",innerexternals, " have wrong lengths")
+            if length(outerexternals)==1 && length(innerexternals)==1
+                print("Modifying...")
+                # In this case, we want to replace the outerport gensymbol
+                # outerexternals[1] with whatever was originally adjacent to the
+                # innerport innerexternals[1]).
+#                inner_external_vertex = g.vertices[index[innerexternals[1]]]
+                nbhrs = out_neighbors(innerexternals[1],g)
+                @assert length(nbhrs)==1
+                newoutersymbol = nbhrs[1].key
+                outerports = replacesymbol(outerexternals[1].key,
+                                           newoutersymbol,outerports)
+                outerexternals = nbhrs #length-one list with the new vertex
+                externals = [outerexternals,innerexternals]
+                println("Modified, outerexternal:",outerexternals,", innerexternal:",innerexternals," externals:",externals)
+            end
+
+            
             # Add the new edge. I can assume neither side is already added to h, 
             # since these are connected components
-            a=add_vertex!(h,externals[1].key)
-            b=add_vertex!(h,externals[2].key)
-            add_edge!(h,a,b)
+            a=add_vertex!(h,externals[1].key); print("addv:",a)
+            b=add_vertex!(h,externals[2].key); print(", addv:",b)
+            add_edge!(h,a,b); print(", adde:",a,b,"\n")
         elseif vs==[] #was if externals==[], exactly the loop case.
             nothing
         else # this has resulted in a loop.  Take the first symbol as a tag
-            @assert externals==[]
+            @assert innerexternals==[] && outerexternals==[] 
             # println(vs," is a loop")
             push!(loops,vs[1].key)
         end
@@ -313,6 +367,29 @@ function gid(nwires::Integer)
     OneCob(g,innerports,outerports,loops)
 end
 
+#causes an error on line 32 of onecobs
+function newgmorvar(ndomwires::Integer,ncodwires::Integer, f::Symbol) 
+    g  =  onecobgraph()
+    #A^{⊗ndomwires}->A^{⊗ncodwires}
+    opp = PortPair(ndomwires,ncodwires,f) 
+
+    for i=1:ncodwires
+        add_vertex!(g,opp.cod[i])
+    end
+    for i=1:ndomwires
+        add_vertex!(g,opp.dom[i])
+    end
+ 
+    innerports = [] # this is a 0-ary op, but the innerports carry the label
+    outerports = opp
+    loops = []
+
+    OneCob(g,innerports,outerports,loops)
+    
+end
+
+
+
 @doc """
 morvar differs in that it can have differing numbers of domwires and codwires, and can attach a symbol to its portpair (usually for a morphism variable).
 """ ->
@@ -353,6 +430,7 @@ function gmorvar(ndomwires::Integer,ncodwires::Integer, f::Symbol)
     OneCob(g,innerports,outerports,loops)
     
 end
+
 
 
 

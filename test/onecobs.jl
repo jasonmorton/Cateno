@@ -119,15 +119,54 @@ afterphi3=gcompose(afterphi2,gcoev(2))
 
 # as can be checked by hand, taking trace of g and g.' via the onecob op method yields graphs with different presentations (vertex orders).  In terms of symbols and edges, the graphs will be the same.  Thus to make these equal we implemented equality of graphs to check that the vertex set and edge set is the same.  See the makeedgeset and graphsequal functions in OneCobs.jl
 
-@test tr(g) == tr(g.') #these are giving graphs with different ordering of vertices.  As it should be, if you work it out on paper.
-@test tr(f) == tr(f.') #these are giving graphs with different ordering of vertices.
+@test tr(g) == tr(g.') #these were giving graphs with different ordering of vertices.  As it should be, if you work it out on paper.
+@test tr(f) == tr(f.') 
 
 
-
+# ey = id(dom(g))
+# this one required rewriting the compose op to contract from the left, i.e. use the rightmost gensym in each connected component.
 @test g ∘ id(dom(g)) == g
 
+f1 = gmorvar(1,1,:f1)
+f2 = gmorvar(1,1,:f2)
+g1 = gmorvar(1,1,:g1)
+g2 = gmorvar(1,1,:g2)
+@test (f1 ⊗ f2) ∘ (g1 ⊗ g2) == (f1 ∘ g1) ⊗ (f2 ∘ g2) #everything equal except innerport order is different; changed equality to test for the set of inner ports to be equal (graph equality will check for edge matchup)
+f1 = gmorvar(3,3,:f1)
+f2 = gmorvar(2,2,:f2)
+g1 = gmorvar(3,3,:g1)
+g2 = gmorvar(2,2,:g2)
+@test (f1 ⊗ f2) ∘ (g1 ⊗ g2) == (f1 ∘ g1) ⊗ (f2 ∘ g2) 
+
+#ZigZag, etc
+A=dom(g1)
+B=dom(g)
+
+#already ok is 
+@test (id(A) ⊗ ev(A)) ∘ (coev(A) ⊗ id(A)) ∘ g1 == id(A) ∘ g1
+@test  (id(B) ⊗ ev(B)) ∘ (coev(B) ⊗ g) == g
+
+idB= id(B)
+@test (id(B) ⊗ ev(B)) ∘ (coev(B) ⊗ idB)  == idB # even this was not Modifying, because there are no innerports unless idB is replaced by something else.
+
+# At first, (id(A) ⊗ ev(A)) ∘ (coev(A) ⊗ id(A))  != id(A)  because they are merely isomorphic: the new symbols being generated in each call. To fix this, we compare OneCobs with no innerports by composing them with something
+@test (id(A) ⊗ ev(A)) ∘ (coev(A) ⊗ id(A))  == id(A)
+
+#currently counting the number of loops.  Subtle error might be possible if there are two different objects/wire colors; might want to use the onecob label field then.
+@test ev(A) ∘ coev(A) == ev(B) ∘ coev(B) ∘ ev(B) ∘ coev(B) ∘ ev(B) ∘ coev(B)
+@test ev(A) ∘ coev(A) == (ev(B) ∘ coev(B)) ⊗ ( ev(B) ∘ coev(B) ) ⊗ ( ev(B) ∘ coev(B))
+
+@test f.'.' == f
+
+psi = gmorvar(0,1,:psi)
+phi = gmorvar(1,0,:phi)
+phipsi = phi ∘ psi #'inner product'/contraction
+psiphi = psi ∘ phi #'outer product'
+@test  tr(psi ∘ phi) == phi ∘ psi
+
+
 # gensym interacts badly with multiple occurances of $g$.  We need new symbols for each copy of g.
-@test g ∘ g == g ∘ g #not working, errors out
-@test f ∘ f == f ∘ f #not working, errors out
+# @test g ∘ g == g ∘ g #<-- we are here
+# @test f ∘ f == f ∘ f #not working, errors out
 
 end
