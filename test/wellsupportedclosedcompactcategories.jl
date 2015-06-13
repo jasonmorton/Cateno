@@ -1,4 +1,4 @@
-module TestWellSupportedClosedCompactCategories
+module TestWellSupportedCompactClosedCategories
 using Base.Test
 using IntMat
 
@@ -28,5 +28,5 @@ using IntMat
 @test epsilon(5) ∘ mu(5) == ev(5)
 @test  delta(5) ∘ u(5) == coev(5)
 
-println("Well Supported Closed Compact Categories tests passed")
+println("Well Supported Compact Closed Categories tests passed")
 end #module TestWellSupportedClosedCompactCategories

@@ -7,7 +7,7 @@ import FiniteTensorSignatures:ObjectWord,MorphismWord
 import MonoidalCategories:MonoidalCategory,dom,cod,id,munit,⊗,∘,σ
 export dom,cod,id,munit,⊗,∘
 
-import MonoidalCategories:ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
+import MonoidalCategories:CompactClosedCategory,dual,transp,ev,coev,tr,Hom,sigma
 export dual,transp,ev,coev,tr,Hom,sigma
 
 import Representations
@@ -43,7 +43,7 @@ end
     munit(A::OneCobObject) = OneCobObject(0)
 end
 
-@instance! ClosedCompactCategory OneCobObject OneCob begin
+@instance! CompactClosedCategory OneCobObject OneCob begin
     dual(A::OneCobObject) = A
     ev(A::OneCobObject) = OneCobs.gev(A.nwires)
     coev(A::OneCobObject)  = OneCobs.gcoev(A.nwires)
@@ -96,7 +96,7 @@ end
 end
 
 
-@instance! ClosedCompactCategory WrappedObjectWord WrappedOneCob begin
+@instance! CompactClosedCategory WrappedObjectWord WrappedOneCob begin
     dual(A::WrappedObjectWord) = WrappedObjectWord(dual(A.contents))
     ev(A::WrappedObjectWord) = WrappedOneCob(dual(A)⊗A,munit(A),OneCobs.gev(nwires(A)))
     coev(A::WrappedObjectWord)  = WrappedOneCob(munit(A),A⊗dual(A),OneCobs.gcoev(nwires(A)))
@@ -115,7 +115,7 @@ function rep(w::MorphismWord)
                      )
                     for f in w.signature.morvars])
     R=Representation(w.signature,           # the FTS
-                     ClosedCompactCategory, # the doctrine
+                     CompactClosedCategory, # the doctrine
                      obdict,
                      mordict)
     R.value(w)

@@ -1,4 +1,4 @@
-module TestClosedCompactCategories
+module TestCompactClosedCategories
 using Base.Test
 using IntMat
 # using MonoidalCategories, Typeclass
@@ -47,6 +47,10 @@ fmat=randn(10,10)
 f=fmat
 B = dom(f)
 @test  (id(B) ⊗ ev(B)) ∘ (coev(B) ⊗ id(B))  == id(B)
+@test  (ev(B) ⊗ id(B)) ∘ (id(B) ⊗ coev(B))  == id(B)
+@test  (id(dual(B)) ⊗ ev(dual(B))) ∘ (coev(dual(B)) ⊗ id(dual(B)))  == id(dual(B))
+@test  (ev(dual(B)) ⊗ id(dual(B))) ∘ (id(dual(B)) ⊗ coev(dual(B)))  == id(dual(B))
+
 A = dom(f^{⊗3})
 @test ev(A) ∘ coev(A) == ev(B) ∘ coev(B) ∘ ev(B) ∘ coev(B) ∘ ev(B) ∘ coev(B)
 @test ev(A) ∘ coev(A) == (ev(B) ∘ coev(B)) ⊗ ( ev(B) ∘ coev(B) ) ⊗ ( ev(B) ∘ coev(B))
@@ -54,5 +58,5 @@ A = dom(f^{⊗3})
 
 #todo: axiom test suite which can be applied to any CCC implementation.
 
-println("Closed Compact Categories tests passed")
+println("Compact Closed Categories tests passed")
 end

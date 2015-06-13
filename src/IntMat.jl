@@ -5,10 +5,10 @@ using Typeclass,MonoidalCategories
 import MonoidalCategories:MonoidalCategory,dom,cod,id,munit,⊗,∘,σ
 export dom,cod,id,munit,⊗,∘
 
-import MonoidalCategories:ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
+import MonoidalCategories:CompactClosedCategory,dual,transp,ev,coev,tr,Hom,sigma
 export dual,transp,ev,coev,tr,Hom,sigma
 
-import MonoidalCategories:WellSupportedClosedCompactCategory,delta,mu,epsilon,u
+import MonoidalCategories:WellSupportedCompactClosedCategory,delta,mu,epsilon,u
 export delta,mu,epsilon,u
 
 typealias Mat Matrix{Float64}
@@ -35,7 +35,7 @@ function swapmat(M,N)
     Out
 end
 
-@instance ClosedCompactCategory Int Mat begin
+@instance CompactClosedCategory Int Mat begin
     dual(A::Int)=A
     transp(f::Mat)=f.' #f' is dagger
     ev(A::Int)= reshape(eye(A),(1,A^2))    #A*⊗A→I
@@ -46,7 +46,7 @@ end
 
 
 
-@instance WellSupportedClosedCompactCategory Int Mat begin
+@instance WellSupportedCompactClosedCategory Int Mat begin
     function delta(A::Int) #A→A ⊗ A 
         out=zeros(A*A,A)
         for i=1:A

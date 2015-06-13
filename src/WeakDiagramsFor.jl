@@ -17,7 +17,7 @@ function diagramsfor(T::FiniteTensorSignature,X::Class)
         if X==MonoidalCategory
             mv_domain = Wires(length(T.dom[mv]))
             mv_codomain = Wires(length(T.cod[mv]))
-        elseif X==ClosedCompactCategory #shld use a type poset
+        elseif X==CompactClosedCategory #shld use a type poset
             mv_domain = Wires(OWord_to_pmz(T.dom[mv]))
             mv_codomain = Wires(OWord_to_pmz(T.cod[mv]))
         end

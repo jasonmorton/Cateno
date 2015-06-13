@@ -2,9 +2,9 @@
 # together with some utility functions useful for instantiation
 module MonoidalCategories
 export MonoidalCategory,dom,cod,id,munit,⊗,∘,comperr
-export ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma,σ
-export WellSupportedClosedCompactCategory,delta,mu,epsilon,u
-export DaggerClosedCompactCategory,dagger
+export CompactClosedCategory,dual,transp,ev,coev,tr,Hom,sigma,σ
+export WellSupportedCompactClosedCategory,delta,mu,epsilon,u
+export DaggerCompactClosedCategory,dagger
 
 #export associator,associatorinv,leftunitor,rightunitor,leftunitorinv,rightunitorinv
 #export lrweaktranspose
@@ -40,7 +40,7 @@ end
 
 
 #Assuming Ob Mor is a MonoidalCategory already
-@class ClosedCompactCategory Ob Mor begin
+@class CompactClosedCategory Ob Mor begin
     dual(A::Ob)::Ob
     # the following transpose requires both strict associativivity, because 
     # the grouping of the three spaces in the middle changes, and strict right
@@ -69,7 +69,7 @@ end
 
 
 #Assuming Ob Mor is a CCC
-@class WellSupportedClosedCompactCategory Ob Mor begin
+@class WellSupportedCompactClosedCategory Ob Mor begin
     delta(A::Ob)::Mor #A→A ⊗ A #how do specify this type info? Mor{A,A⊗A} ?
     mu(A::Ob)::Mor #A→A ⊗ A
     epsilon(A::Ob)::Mor #A→I
@@ -82,13 +82,13 @@ end
 
 
 #Assuming Ob Mor is a CCC
-# @class NonstrictClosedCompactCategory Ob Mor begin
+# @class NonstrictCompactClosedCategory Ob Mor begin
 #     leftunitor(f::Mor,id::Mor)
 # end
 
 
-#Assuming Ob Mor is a ClosedCompactCategory already
-@class DaggerClosedCompactCategory Ob Mor begin
+#Assuming Ob Mor is a CompactClosedCategory already
+@class DaggerCompactClosedCategory Ob Mor begin
     dagger(A::Ob)=A
     dagger(f::Mor)::Mor
     #syntax
