@@ -198,8 +198,8 @@ end
 function gcompose(phi::OneCob,psi::OneCob)
     innerports = [phi.innerports;psi.innerports] 
     outerports = PortPair(phi.outerports.cod,psi.outerports.dom)
-    println("innerports: ",innerports)
-    println("outerports: ",outerports)
+    # println("innerports: ",innerports)
+    # println("outerports: ",outerports)
     loops = [phi.loops;psi.loops] # this may grow when simplifying
     # initialize a big graph whose vertices are the symbols of all nonloop ports
     g, index = disjoint_union(phi.graph,psi.graph)
@@ -212,7 +212,7 @@ function gcompose(phi::OneCob,psi::OneCob)
     for i=1:n
         phiport = phi.outerports.dom[i]
         psiport = psi.outerports.cod[i]
-        println("add edge ", g.vertices[index[phiport]], g.vertices[index[psiport]])
+        # println("add edge ", g.vertices[index[phiport]], g.vertices[index[psiport]])
         add_edge!(g, g.vertices[index[phiport]], g.vertices[index[psiport]])
     end
 
@@ -225,18 +225,18 @@ function gcompose(phi::OneCob,psi::OneCob)
     # vertices and is a loop.
     cc=connected_components(g)
 #    return g
-    println("Connected components: ",cc)
+    #println("Connected components: ",cc)
     for vs in cc
         # find the two exits if they exist
 #        externals = filter(x->(x.key in outerports) || (x.key in innerports),vs)
         outerexternals = filter(x->(x.key in outerports) ,vs)
         innerexternals = filter(x->(x.key in innerports) ,vs)
         externals = [outerexternals,innerexternals]
-        println("outerexternal:",outerexternals,", innerexternal:",innerexternals," externals:",externals)
+        #println("outerexternal:",outerexternals,", innerexternal:",innerexternals," externals:",externals)
         if !isempty(externals)
             @assert length(externals)==2  string("outerexternal:",outerexternals,", innerexternal:",innerexternals, " have wrong lengths\n")
             if length(outerexternals)==1 && length(innerexternals)==1
-                print("Modifying...")
+                #print("Modifying...")
                 # In this case, we want to replace the outerport gensymbol
                 # outerexternals[1] with whatever was originally adjacent to the
                 # innerport innerexternals[1]).
@@ -248,15 +248,15 @@ function gcompose(phi::OneCob,psi::OneCob)
                                            newoutersymbol,outerports)
                 outerexternals = nbhrs #length-one list with the new vertex
                 externals = [outerexternals,innerexternals]
-                println("Modified, outerexternal:",outerexternals,", innerexternal:",innerexternals," externals:",externals)
+                #println("Modified, outerexternal:",outerexternals,", innerexternal:",innerexternals," externals:",externals)
             end
 
             
             # Add the new edge. I can assume neither side is already added to h, 
             # since these are connected components
-            a=add_vertex!(h,externals[1].key); print("addv:",a)
-            b=add_vertex!(h,externals[2].key); print(", addv:",b)
-            add_edge!(h,a,b); print(", adde:",a,b,"\n")
+            a=add_vertex!(h,externals[1].key); #print("addv:",a)
+            b=add_vertex!(h,externals[2].key); #print(", addv:",b)
+            add_edge!(h,a,b); #print(", adde:",a,b,"\n")
         elseif vs==[] #was if externals==[], exactly the loop case.
             nothing
         else # this has resulted in a loop.  Take the first symbol as a tag
