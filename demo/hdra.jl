@@ -35,8 +35,8 @@ ev(A) ∘ coev(A) == (ev(B) ∘ coev(B)) ⊗ ( ev(B) ∘ coev(B) ) ⊗ ( ev(B) �
 #inner product vs trace of outer product
 psi = gmorvar(0,1,:psi);
 phi = gmorvar(1,0,:phi);
-phipsi = phi ∘ psi #'inner product'/contraction
-psiphi = psi ∘ phi #'outer product'
+phipsi = phi ∘ psi; #'inner product'/contraction
+psiphi = psi ∘ phi; #'outer product'
 
 tr(psi ∘ phi) == phi ∘ psi
 
