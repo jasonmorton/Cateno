@@ -16,6 +16,8 @@ type OneCob
 end
 
 
+
+
 function dfs(neighbors::Adjlist,v::Integer)
     N = length(neighbors)
     visited = falses(N)::BitArray{1}
@@ -29,7 +31,7 @@ function dfs(neighbors::Adjlist,v::Integer)
         end
     end
     visited
-end        
+end
 
 dfs(oc::OneCob,v) = dfs(oc.neighbors,v)
 
@@ -87,28 +89,53 @@ function gcompose(oc1,oc2)
     for i in numglued # same as oc2.outports
         addedge!(oc3, oc1.inports[i], offset + oc2.outports[i])
     end
-    # Simplify. Decide if each component is a loop; if it is, record that, otherwise replace it with a 
+    # Simplify. Decide if each component is a loop; if it is, record that,
+    # otherwise replace it with an edge
+    simplified_components = Array{Integer,1}[]
+
     for component in connectedcomponents(oc3)
-        loop = true
+        # Each connected component is one of four possibilities: a half-loop
+        # connecting two inports, a half-loop connecting two outports, a
+        # loop, or an edge connecting one inport to one outport.
+        component_is_loop = true
+        inport = 0
+        outport = 0
         for v in component
-            if v in newinports
-                loop = false
+            if v in newinports # look for ports; port type determines cob type
+                component_is_loop = false
+                if inport != 0  # already saw an inport, so this component
+                                # is a half-loop connecting two inports
+                    push!(simplified_components,[inport,v])
+                elseif outport !=0 # this must be an edge inport to outport
+                    push!(simplified_components,[v,outport])
+                else # first port discovered, next port found will determine type
+                    inport = v
+                end
             elseif v in newoutports
-                loop = false
-            else #v is internal
+                component_is_loop = false
+                if outport != 0  # already saw an outport, so this component
+                                # is a half-loop connecting two outports
+                    push!(simplified_components,[outport,v])
+                elseif inport !=0 # this must be an edge inport to outport
+                    push!(simplified_components,[inport,v])
+                else # first port discovered, next port found will determine type
+                    inport = v
+                end
+
+            else # v is internal to the connected component
                 nothing
             end
-            
-            if loop
-                push!(newfakeinports,?????)
-            else
-                
-            end
+        end
+
+        if component_is_loop
+            push!(newfakeinports,?????)
+        else
+            nothing
         end
             
 
 
-    end
+    end #end component in cc lloop
 end
 
 
