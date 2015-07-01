@@ -30,3 +30,4 @@ using IntMat
 
 println("Well Supported Compact Closed Categories tests passed")
 end #module TestWellSupportedClosedCompactCategories
+
