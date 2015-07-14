@@ -1,5 +1,5 @@
 using Typeclass,Representations,FiniteTensorSignatures,WeakWiresBoxes,MonoidalCategories
-
+import Base.show
 #automatically compute a diagram interpretation from a finite tensor signature
 #second argument is the kind of category, eg. MC, CCC, DCCC.
 #consider placing into show in FTS for MorphismWords
@@ -40,7 +40,31 @@ function diagramsfor(T::FiniteTensorSignature,X::Class)
 #    end
 end
 
+if isinteractive()
+    print("Loading Compose...")
+    import Compose
+    print("Loading Blink...")
+    import Blink
+    print("Initializing Blink...")
+    BlinkDisplay.init() #also gets imported as  a module by blink
+    media(Compose.Context,Media.Graphical)
+    ctx = Compose.compose(Compose.context(),Compose.text(0.5,0.5,"Ready")) 
+    display(ctx) # just the statment ctx wont call display if there is anything after it, so nothing to pin to.
+    media(Boxx,Media.Graphical)
+    pin();
+    display(WeakWiresBoxes.mbox(1,1,"Ready  ").')
+    # fts"f:A->A"
+    # oldshow=@which show(STDOUT,f) # this gives a method, not callable
+                       
+    function show(io::IO,w::MorphismWord)
+        d = diagramsfor(w.signature, CompactClosedCategory)
+#        display(d.value(w))
+        BlinkDisplay.Graphics.render(BlinkDisplay._display, d.value(w))
+        print(io,"$(w.contents):$(FiniteTensorSignatures.otreestring(w.dom.contents.word))→$(FiniteTensorSignatures.otreestring(w.cod.contents.word)) over $(w.signature)")
+ #       display(io,d.value(w));
+    end
 
+end
 
 
 
