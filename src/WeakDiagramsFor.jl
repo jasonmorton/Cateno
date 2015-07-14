@@ -40,6 +40,8 @@ function diagramsfor(T::FiniteTensorSignature,X::Class)
 #    end
 end
 
+
+#get rid of display magic and run at lower level, completely separate from interactive -- causes problems displaying (3,3) and such.
 if isinteractive()
     print("Loading Compose...")
     import Compose
