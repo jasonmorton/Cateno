@@ -1,6 +1,6 @@
 julia 0.3-
 Typeclass
-Compose
+Compose 0.3.11
 Blink
 Graphs
 Docile
