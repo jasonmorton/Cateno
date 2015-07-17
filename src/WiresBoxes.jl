@@ -4,7 +4,7 @@ import MonoidalCategories:MonoidalCategory,dom,cod,id,munit,⊗,∘ #this unifie
 import Compose
 using Compose:Context,context,rectangle,circle,fill #doesn't put in scope
 export dom,cod,id,munit,⊗,∘
-import MonoidalCategories:ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
+import MonoidalCategories:CompactClosedCategory,dual,transp,ev,coev,tr,Hom,sigma
 export dual,transp,ev,coev,tr,Hom,sigma
 export tdraw,draw,bra,ket,mbox,swap,cup,cap,lines,Boxx,Wires
 
@@ -153,7 +153,7 @@ function tdraw(cont,filename)
 end
 
 #without arrows first
-@instance! ClosedCompactCategory Wires Boxx begin
+@instance! CompactClosedCategory Wires Boxx begin
     dual(n::Wires)=n
     # ev for Wires(2) is cap ⊗ cap ∘ (id(Wires(1)) ⊗ swap ⊗id(Wires(1)))
     # etc, to fix, use crossed nested

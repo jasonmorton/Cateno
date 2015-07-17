@@ -1,5 +1,5 @@
 using Typeclass,Representations,FiniteTensorSignatures,WeakWiresBoxes,MonoidalCategories
-
+import Base.show
 #automatically compute a diagram interpretation from a finite tensor signature
 #second argument is the kind of category, eg. MC, CCC, DCCC.
 #consider placing into show in FTS for MorphismWords
@@ -17,7 +17,7 @@ function diagramsfor(T::FiniteTensorSignature,X::Class)
         if X==MonoidalCategory
             mv_domain = Wires(length(T.dom[mv]))
             mv_codomain = Wires(length(T.cod[mv]))
-        elseif X==ClosedCompactCategory #shld use a type poset
+        elseif X==CompactClosedCategory #shld use a type poset
             mv_domain = Wires(OWord_to_pmz(T.dom[mv]))
             mv_codomain = Wires(OWord_to_pmz(T.cod[mv]))
         end
@@ -40,6 +40,49 @@ function diagramsfor(T::FiniteTensorSignature,X::Class)
 #    end
 end
 
+
+
+if isinteractive()
+    # print("Interactive Session.  Loading Compose...")
+    # import Compose
+    print("Loading Blink...")
+    import Blink
+    print("Initializing Blink...")
+    atomsh = Blink.init() #starts shell
+    windw = Blink.Window(atomsh) #wraps in Window
+# Blink.loadhtml(w,BlinkDisplay.tohtml(d.value(f)))
+    let T = FTS("f:A->A"), f = MW(:f,T), d = diagramsfor(f.signature, CompactClosedCategory)
+        
+        Blink.loadhtml(windw,BlinkDisplay.tohtml(d.value(f.')))
+    end
+#    BlinkDisplay.Graphics.render(BlinkDisplay._display, ctx)
+
+    # media(Compose.Context,Media.Graphical)
+    # ctx = Compose.compose(Compose.context(),Compose.text(0.5,0.5,"Ready"))
+    # display(ctx) # just the statment ctx wont call display if there is anything after it, so nothing to pin to.
+    # media(Boxx,Media.Graphical)
+ #   pin();
+    # display(WeakWiresBoxes.mbox(1,1,"Ready  ").')
+
+
+    # oldshow=@which show(STDOUT,f) # this gives a method, not callable
+                       
+    function show(io::IO,w::MorphismWord)
+        d = diagramsfor(w.signature, CompactClosedCategory)
+#        display(d.value(w))
+        #      BlinkDisplay.Graphics.render(BlinkDisplay._display, d.value(w))
+        Blink.loadhtml(windw,BlinkDisplay.tohtml(d.value(w)))
+        print(io,"$(w.contents):$(FiniteTensorSignatures.otreestring(w.dom.contents.word))→$(FiniteTensorSignatures.otreestring(w.cod.contents.word)) over $(w.signature)")
+ #       display(io,d.value(w));
+    end
+
+end
+
+
+# import Blink
+# ash = Blink.init() #starts shell
+# w = Blink.Window(ash) #wraps in Window
+# Blink.loadhtml(w,BlinkDisplay.tohtml(d.value(f)))
 
 
 
