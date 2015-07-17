@@ -53,8 +53,8 @@ Everything in Cateno is represented in terms of five modular components:
   * a **morphism expression**  (e.g.\ $f \ot (g \circ \delta_A \circ h)$) in a free language, or 
   * a concrete **value** in an implementation (e.g.\ $\begin{pmatrix}1 & 3\\4 & 5 \end{pmatrix}$)  
 
-* a **representation** (a functor) between implementations (usually free $\rightarrow$ concrete, e.g.\ a binding $f = \begin{pmatrix}1 & 3\\4 & 5 \end{pmatrix}$) for each symbol)
-* **algorithms** are expressed in terms of the defining methods of the doctrine (e.g.\ $\otimes$, $\delta$) or operadically
+* a **representation** (a functor) between implementations (usually free $\rightarrow$ concrete).  This is essentially a binding $f = \begin{pmatrix}1 & 3\\4 & 5 \end{pmatrix}$) for each symbol, that satisfies some axioms
+* **algorithms** are expressed in terms of the defining methods of the doctrine (e.g.\ $\otimes$, $\delta$) or operadically (more on this later)
 
 From the modeling perspective, there are five parts to a Cateno model.
 
