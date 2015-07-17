@@ -1,5 +1,8 @@
+push!(LOAD_PATH,  joinpath(homedir(),".julia","v0.3","Cateno","src") )
+print("Loading Cateno...")
 using Typeclass,Representations,FiniteTensorSignatures,WeakWiresBoxes,MonoidalCategories
 import Base.show
+import FiniteTensorSignatures.show
 #automatically compute a diagram interpretation from a finite tensor signature
 #second argument is the kind of category, eg. MC, CCC, DCCC.
 #consider placing into show in FTS for MorphismWords
@@ -50,10 +53,15 @@ if isinteractive()
     print("Initializing Blink...")
     atomsh = Blink.init() #starts shell
     windw = Blink.Window(atomsh) #wraps in Window
+    Blink.title(windw,"Cateno")
 # Blink.loadhtml(w,BlinkDisplay.tohtml(d.value(f)))
     let T = FTS("f:A->A"), f = MW(:f,T), d = diagramsfor(f.signature, CompactClosedCategory)
-        
         Blink.loadhtml(windw,BlinkDisplay.tohtml(d.value(f.')))
+        #when object labels work, this will spell Cateno
+        # let T = FTS("t:A->E,n:E->O"), t = MW(:t,T),  n = MW(:n,T),
+        # word = (ev(A)∘(id(dual(A))⊗ (t ∘ n)))
+        # Blink.loadhtml(windw,BlinkDisplay.tohtml(d.value(word)))
+
     end
 #    BlinkDisplay.Graphics.render(BlinkDisplay._display, ctx)
 

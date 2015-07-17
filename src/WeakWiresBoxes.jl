@@ -48,6 +48,7 @@ writemime(io::IO, m::MIME"image/svg+xml", b::Boxx)=writemime(io::IO, m, b.con)
         elseif  filter(x->x!=0,dom(f).signs)==filter(x->x!=0,cod(g).signs)
             # now figure out which is longer (therefore has more Is), f or g, 
             # and pad the other one to the same length.
+#            println("Adjusting domains")
             length_domf_minus_length_codg=length(dom(f))-length(cod(g))
             if  length_domf_minus_length_codg==0 #they are already the same length,
                                                  # and just need a permutation
