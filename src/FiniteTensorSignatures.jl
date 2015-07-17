@@ -1,8 +1,8 @@
 # Finite Tensor signatures as Julia expressions over a fixed 'type' alphabet
 module FiniteTensorSignatures
 import MonoidalCategories:MonoidalCategory,dom,cod,id,munit,⊗,∘,comperr
-import MonoidalCategories:ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
-import MonoidalCategories:DaggerClosedCompactCategory,dagger
+import MonoidalCategories:CompactClosedCategory,dual,transp,ev,coev,tr,Hom,sigma
+import MonoidalCategories:DaggerCompactClosedCategory,dagger
 export FiniteTensorSignature,nullsig,FTS,MW,@fts_str
 export dom,cod,id,munit,⊗,∘
 export dual,transp,ev,coev,tr,Hom,sigma
@@ -332,7 +332,7 @@ end
 #CCCs are declared with @instance! since we need to override the default Julia transpose method, which applies to any type transpose(x)=x in operators.jl
 
 # Assume OWord, MWord are a MonoidalCategory
-@instance! ClosedCompactCategory OWord MWord  begin
+@instance! CompactClosedCategory OWord MWord  begin
     dual(A::OWord)=toggledual(A) #was map(tog,A)
 #    transp(f::Mor)=id(cod(f)) ⊗ coev(dom(f)) | id(cod(f))⊗f⊗id(dom(f)) | ev(cod(f))⊗id(dom(f))
     ev(A::OWord)=A==I_oword? id_I_oword: Expr(:call,:ev,A.word)     #A*⊗A→I
@@ -343,7 +343,7 @@ end
 end
 
 
-@instance! ClosedCompactCategory ObjectWord MorphismWord begin
+@instance! CompactClosedCategory ObjectWord MorphismWord begin
     dual(A::ObjectWord)=ObjectWord(toggledual(A.contents),A.signature)
     ev(A::ObjectWord)=MorphismWord(ev(A.contents),A.signature,dual(A)⊗A,munit(A))
     coev(A::ObjectWord)=MorphismWord(coev(A.contents),A.signature,munit(A),A⊗dual(A))
@@ -352,8 +352,8 @@ end
 
 #transpose(f::MorphismWord)=transp(f) #f.' notation # in CCC definition
 
-#Assuming Ob Mor is a ClosedCompactCategory already
-# @class DaggerClosedCompactCategory Ob Mor begin
+#Assuming Ob Mor is a CompactClosedCategory already
+# @class DaggerCompactClosedCategory Ob Mor begin
 #     dagger(A::Ob)=A
 #     dagger(f::Mor)=daggerword(f)
 # end
@@ -387,7 +387,7 @@ function daggerword(word::Expr)
 end
 
 #@instance! to override default ctranspose no op.
-@instance! DaggerClosedCompactCategory ObjectWord MorphismWord begin
+@instance! DaggerCompactClosedCategory ObjectWord MorphismWord begin
     dagger(f::MorphismWord)=MorphismWord(daggerword(f.contents),f.signature,f.cod,f.dom)
 end
 

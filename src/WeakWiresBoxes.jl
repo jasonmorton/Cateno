@@ -4,7 +4,7 @@ import MonoidalCategories:MonoidalCategory,dom,cod,id,munit,⊗,∘,comperr
 import Compose
 using Compose:Context,context,rectangle,circle,fill #doesn't put in scope
 export dom,cod,id,munit,⊗,∘
-import MonoidalCategories:ClosedCompactCategory,dual,transp,ev,coev,tr,Hom,sigma
+import MonoidalCategories:CompactClosedCategory,dual,transp,ev,coev,tr,Hom,sigma
 export dual,transp,ev,coev,tr,Hom,sigma
 export bra,ket,mbox,swap,cup,cap,lines,Boxx,Wires
 
@@ -308,7 +308,7 @@ function primitive(w::Wires,kind::Symbol,π::Array)
 end
 
 
-@instance! ClosedCompactCategory Wires Boxx begin
+@instance! CompactClosedCategory Wires Boxx begin
     dual(w::Wires)=Wires(-w.signs)
     ev(w::Wires)  = primitive(w,:cap)
     coev(w::Wires)= primitive(w,:cup)
