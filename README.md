@@ -1,10 +1,11 @@
 # Cateno
 =======
-Cateno is a system for computational category theory and applications.  It provides an interactive calculator for free morphism expressions and string diagram generation. It also handles concrete categories, and can be used as a typed numerical linear algebra system.  A number of algorithms are implemented at the levelof catgorical abstraction: you just need to specify how an object satisfies some axioms, and you have access to fast algorithms for inference, tree decomposition, contraction, and so on.
+Cateno is a system for computational category theory and applications.  It provides an interactive calculator for free morphism expressions and string diagram generation. It also handles concrete categories, and can be used as a typed numerical linear algebra system.  Algorithms are implemented at the level of catgorical abstraction: you just need to specify how the necessary interface is implemented, and you have access to fast algorithms for inference, tree decomposition, contraction, and so on.  This enables fast development of models of uncertainty.
 
 Check out the static demos (Ipython/Jupyter notebooks): [qubits](https://github.com/jasonmorton/Cateno/blob/master/demo/ThreeQubitsFTS.ipynb), and screencasts:
 
 Cateno is primarily written in Julia. 
+Cateno can be used in an IPython/Jupyter notebook, interactively at the Julia prompt (with diagram-drawing in a separate window), or as a set of libraries.  In the future we plan to make available bindings or ports to other languages.
 
 ## Goals
 
