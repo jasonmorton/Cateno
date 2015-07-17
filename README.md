@@ -42,18 +42,18 @@ Future: reduce your uncertainty/information-processing applied math problem to (
 
 ## Design Principles
 
-A kind of category (called a *doctrine*, for example  monoidal category, compact closed category, or well-supported compact closed category) is represented as a Typeclasses (also called a trait or interface).  These describe the *common interface* available to manipulate  morphism expressions in any particular category.
+A kind of category (called a *doctrine*, for example  monoidal category, compact closed category, or well-supported compact closed category) is represented as a [Typeclass](https://github.com/jasonmorton/Typeclass.jl) (also called a trait or interface).  These describe the *common interface* available to manipulate  morphism expressions in any particular category.
 
 Everything in Cateno is represented in terms of five modular components:
 
-* a **doctrine** (e.g.\ ``compact closed category'')
-* an instance  (implementation) of a doctrine (e.g. matrices or relations as CCC), either:
+* a **doctrine** (e.g. ``compact closed category''), which is a typeclass
+* an instance  (implementation) of a doctrine (e.g. matrices or relations as CCC), implemented as a *pair of types* which together implement the doctrine.  A value of the morphism type of an instance is either:
 
-  * a **morphism expression**  (e.g.\ $f \ot (g \circ \delta_A \circ h)$) in a free language, or 
+  * a **morphism expression**  (e.g.\ $f \ot (g \circ \delta_A \circ h)$) in a free language over a tensor signature, or 
   * a concrete **value** in an implementation (e.g.\ $\begin{pmatrix}1 & 3\\4 & 5 \end{pmatrix}$)  
 
-* a **representation** (a functor) between implementations (usually free $\rightarrow$ concrete).  This is essentially a binding $f = \begin{pmatrix}1 & 3\\4 & 5 \end{pmatrix}$) for each symbol, that satisfies some axioms
-* **algorithms** are expressed in terms of the defining methods of the doctrine (e.g.\ $\otimes$, $\delta$) or operadically (more on this later)
+* a **representation** (a functor) between implementations (usually free $\rightarrow$ concrete).  This is usually a binding $f = \begin{pmatrix}1 & 3\\4 & 5 \end{pmatrix}$) for each symbol, that satisfies some axioms.
+* **algorithms** are expressed in terms of the defining methods of the doctrine (e.g. $\otimes$, $\delta$) or operadically (more on this later)
 
 From the modeling perspective, there are five parts to a Cateno model.
 
