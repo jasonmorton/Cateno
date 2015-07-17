@@ -9,7 +9,8 @@ Cateno can be used in an IPython/Jupyter notebook, interactively at the Julia pr
 
 ## Goals
 
-A practical computer algebra system for computational (monoidal) category theory should be able to: 
+A practical computer algebra system for computational (monoidal) category theory should be able to:
+
 1. manipulate abstract categorical quantities such as morphism terms in a REPL.
 2. compile/lower code expressed categorically to an efficient implementation in a particular category (e.g. numerical linear algebra, (probabilistic) databases, quantum simulation, belief networks).
 3. scale to be useful for practical computational problems in modeling uncertainty in data analysis, statistics, physics, computer science.
