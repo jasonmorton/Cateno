@@ -72,8 +72,6 @@ From the modeling perspective, there are five parts to a Cateno model.
 * **Algorithms**, categorically expressed, for processing and analyzing data.  Make quantitative predictions,  choose the model which best explains a given system (often a variant of belief propagation).
 
 
-# About the name
-=================
+## About the name
 
-
-Cateno is a Latin verb that means "to chain together" or "to bind."  Working with Cateno involves chaining together lego-like pieces to make a larger model, and binding morphism variables in a representation.  The project is intended to help build bridges across disciplines by making their analogous models literally the same, so we like the fact that cateno is the root of the word catenary, which suggests such a role. Finally it starts with "cat" just as category, although "category" is Greek in origin.
+The word cateno is a Latin verb that means "to chain together" or "to bind."  Working with Cateno involves chaining together lego-like pieces to make a larger model, and binding morphism variables in a representation.  The project is intended to help build bridges across disciplines by making their analogous models literally the same, so we like the fact that cateno is the root of the word catenary, which suggests such a role. Finally it starts with "cat" just as category, although "category" is Greek in origin.
