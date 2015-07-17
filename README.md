@@ -54,22 +54,22 @@ Future: reduce your uncertainty/information-processing applied math problem to (
 
 Everything the computer does is represented as one of five modular components:
 
-* a \tblue{doctrine} (e.g.\ ``compact closed category'')
+* a **doctrine** (e.g.\ ``compact closed category'')
 * an instance or implementation of a doctrine (e.g. matrices or relations as CCC):
-  \begin{itemize}
-  * a \tblue{morphism term} or word (e.g.\ $f \ot (g \circ \delta_A \circ h)$) in a free language, or 
-  * a concrete \tblue{value} in an implementation (e.g.\ $\begin{pmatrix}1 & 3\\4 & 5 \end{pmatrix}$)  
-  \end{itemize}
-* a \tblue{representation} (a functor) between implementations (usually free $\rightarrow$ concrete, e.g.\ a binding $f = \begin{pmatrix}1 & 3\\4 & 5 \end{pmatrix}$) for each symbol)
-* \tblue{algorithms} are expressed in terms of the defining methods of the doctrine (e.g.\ $\otimes$, $\delta$) or operadically
+
+  * a **morphism term** or word (e.g.\ $f \ot (g \circ \delta_A \circ h)$) in a free language, or 
+  * a concrete **value** in an implementation (e.g.\ $\begin{pmatrix}1 & 3\\4 & 5 \end{pmatrix}$)  
+
+* a **representation** (a functor) between implementations (usually free $\rightarrow$ concrete, e.g.\ a binding $f = \begin{pmatrix}1 & 3\\4 & 5 \end{pmatrix}$) for each symbol)
+* **algorithms** are expressed in terms of the defining methods of the doctrine (e.g.\ $\otimes$, $\delta$) or operadically
 
 From the modeling perspective, there are five parts to a Cateno model.
 
-* \tblue{Morphism Term:} a human-readable {\bf qualitative model}, captured by a labeled generalized graph;  fixes the relationships, {\em suggests} qualitative rules and syntax of the model
-* \tblue{Doctrine:} formal {\bf categorical syntax} constraining the quantitative models of uncertainty that can be attached, rewrite rules, available constructions
-* \tblue{Value:} a machine-processed {\bf quantitative model} in which  the graph is interpreted and the data summarized, e.g.\ probab- ilistically as a Bayesian network, in Hilbert space for a quantum circuit, or with rate constants in a chemical reaction network
-* \tblue{Representation:} the {\bf interpretation} assigning quantitative meaning to the qualitative description (generalizing the mathematical idea of a representation of a quiver or algebra)
-* \tblue{\bf Algorithms}, categorically expressed, for processing and analyzing data.  Make quantitative predictions,  choose the model which best explains a given system (often a variant of belief propagation).
+* **Morphism Term:** a human-readable *qualitative model*, captured by a labeled generalized graph;  fixes the relationships, *suggests* qualitative rules and syntax of the model
+* **Doctrine:** formal *categorical syntax* constraining the quantitative models of uncertainty that can be attached, rewrite rules, available constructions
+* **Value:** a machine-processed *quantitative model* in which  the graph is interpreted and the data summarized, e.g. probabilistically as a Bayesian network, in Hilbert space for a quantum circuit, or with rate constants in a chemical reaction network
+* **Representation:** the *interpretation* assigning quantitative meaning to the qualitative description (generalizing the mathematical idea of a representation of a quiver or algebra)
+* **Algorithms**, categorically expressed, for processing and analyzing data.  Make quantitative predictions,  choose the model which best explains a given system (often a variant of belief propagation).
 
 
 # About the name
