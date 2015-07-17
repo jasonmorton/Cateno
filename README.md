@@ -15,7 +15,7 @@ A practical computer algebra system for computational (monoidal) category theory
 2. Compile code expressed categorically to an efficient implementation in a particular category (e.g. numerical linear algebra, (probabilistic) databases, quantum simulation, belief networks).
 3. Scale to be useful for practical computational problems in modeling uncertainty in data analysis, statistics, physics, computer science.
 
-There is more than one way to accomplish (1), and our design choices are driven by (2) and (3) as well.  In particular we use wrapper classes (wrap an untyped object in a typed wrapper) and representations (functorial bindings) whenever possible.   Note that Cateno is not intended as a proof assistant; rather it is a consumer of proofs that, e.g., something is a compact closed category.  Cateno then lets you use that knowledge to compute things.
+There is more than one way to accomplish (1), and our design choices are driven by (2) and (3) as well.  In particular we use wrapper classes (wrap an untyped object in a typed wrapper) and representations (functorial bindings) whenever possible.   Note that Cateno is not intended as a proof assistant; rather it is a consumer of proofs that, e.g., something is a compact closed category.  Cateno then lets you use that knowledge to compute things and build models.
 
 For people interested primarily in *modeling*, rather than computational category theory in its own right, we aim to:
 
@@ -40,8 +40,7 @@ Future: reduce your uncertainty/information-processing applied math problem to (
 
 
 
-# Design Principles
-====================
+## Design Principles
 
 A kind of category (called a *doctrine*, for example  monoidal category, compact closed category, or well-supported compact closed category) is represented as a Typeclasses (also called a trait or interface).  These describe the *common interface* available to manipulate  morphism expressions in any particular category.
 
