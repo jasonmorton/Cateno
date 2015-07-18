@@ -84,6 +84,10 @@ if isinteractive()
  #       display(io,d.value(w));
     end
 
+    function viewcontext(c::Compose.Context)
+        Blink.loadhtml(windw,BlinkDisplay.tohtml(c))
+    end
+
 end
 
 
@@ -109,3 +113,4 @@ end
 # {f:A→B,g:B→C,h:A⊗B→C}
 
 # julia> D=diagramsfor(T,ClosedCompactCategory).value
+

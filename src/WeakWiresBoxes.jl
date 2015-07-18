@@ -41,7 +41,10 @@ writemime(io::IO, m::MIME"image/svg+xml", b::Boxx)=writemime(io::IO, m, b.con)
     id(w::Wires)=primitive(w,:line) #Boxx(lines(w.signs),w,w,1) #lines skips Is in array
     function compose(f::Boxx,g::Boxx)
         if dom(f)==cod(g)
-            hstackCons(f,g)
+            hstackCons(f,g)     
+#            hstackCons( hstackCons(f,labeledbarelines()),g) but Boxx doesn't know its labels.
+
+
         #  try to unify the objects, and then apply a permutation
         #  first of all, see if they have the same objects up to insertion and 
         #  deletion of Is, e.g. A⊗I⊗B and A⊗B⊗I⊗I
@@ -179,6 +182,41 @@ function lines(signs::Array{Int})
     Compose.compose(Compose.context(),Compose.stroke(Compose.color("black")),Compose.linewidth(1),lineContexts...)
 end
 
+
+function labeledbarelines{T<:String}(signs::Array{Int},labels::Array{T})
+    N=length(signs)
+    lineContexts=Any[]
+    for i=1:N
+        y=(i-.5)/N
+        # ycy = Compose.Measure(0,0,y,0,0)
+        # half = Compose.Measure(0,0.5,0,0,0)
+        if signs[i]==-1
+            thisline=[Compose.line([(0,y),(1,y)]),
+                      # Compose.line([(.5,y),(.45,y-.05)]),
+                      # Compose.line([(.5,y),(.45,y+.05)]),
+                      Compose.compose(Compose.context(),Compose.text(.5,y-.07,labels[i]),Compose.linewidth(.3)) 
+                      ]
+        elseif signs[i]==1
+            thisline=[Compose.line([(0,y),(1,y)]),
+                      # Compose.line([(.5,y),(half + .1Compose.w,ycy - .1Compose.h)]),
+                      # Compose.line([(.5,y),(half + .1Compose.w,ycy + .1Compose.h)])]
+                      # Compose.line([(.5,y),(.55,y-.05)]),
+                      # Compose.line([(.5,y),(.55,y+.05)]),
+                      Compose.compose(Compose.context(),Compose.text(.5,y+.07,labels[i]),Compose.linewidth(.3)) 
+            ]
+           
+        elseif signs[i]==0
+            thisline=[] #Compose.line([(.45,y),(.55,y)])]
+        else
+            error("invalid line")
+        end
+        append!(lineContexts,thisline)
+    end
+    Compose.compose(Compose.context(),Compose.stroke(Compose.color("black")),Compose.linewidth(1),lineContexts...)
+end
+
+
+
 threeptpoly(a,b,c,tx)=Compose.compose(Compose.context(),Compose.polygon([a,b,c]),Compose.fill(Compose.RGBA{Float64}(0,0,0,0)),Compose.stroke(Compose.color("black")),Compose.text(.5,.5,tx))
 
 ### Helper functions for building primitive graphical elements
@@ -228,6 +266,7 @@ swapcon=Compose.compose(swap_underline,Compose.compose(swap_overline("white",2),
 
 swap=Boxx(swapcon,[1 1],[1 1],1)
 
+#todo: always insert a primitive when composing.  When not needed, just add lengthless one with labels only.
 #swaps, unitors, perms, lines, etc all special cases of
 primitive(w::Wires,kind::Symbol)=primitive(w::Wires,kind::Symbol,[i for i in 1:length(w.signs)])
 function primitive(w::Wires,kind::Symbol,π::Array)
