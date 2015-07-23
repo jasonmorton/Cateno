@@ -82,12 +82,15 @@ type FiniteTensorSignature
     morvars::Set{Symbol}
     dom::Dict{Symbol,OWord}
     cod::Dict{Symbol,OWord}
+    doctrine
 end
 ==(T::FiniteTensorSignature,S::FiniteTensorSignature)=
     T.obvars == S.obvars &&
     T.morvars == S.morvars &&
     T.dom == S.dom &&
     T.cod == S.cod
+
+FiniteTensorSignature(o,m,d,c)=FiniteTensorSignature(o,m,d,c,MonoidalCategory)
 
 #A FTS that casts anywhere
 FiniteTensorSignature()=FiniteTensorSignature(Set{Symbol}([]),Set{Symbol}([]),Dict(),Dict())
