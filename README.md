@@ -1,3 +1,6 @@
+
+Warning: this is very early stage, not ready for use.  It is public just to share with some interested folks.
+
 # Cateno
 =======
 Cateno is a system for computational category theory and applications.  It provides an interactive calculator for free morphism expressions and string diagram generation for monoidal categories. It also handles concrete categories, and can be used as a typed numerical linear algebra system.  Algorithms are implemented using catgorical interfaces: tell Cateno how the objects, morphisms, and structure maps are implemented, and you have access to fast algorithms for normal forms, inference, tree decomposition, contraction, marginalization, and so on.  This enables fast development of models of uncertainty.
